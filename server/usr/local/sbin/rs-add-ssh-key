@@ -1,0 +1,28 @@
+#!/bin/sh
+##
+# rs-add-ssh-key
+# Copyright (C) 2013 by Janek Bevendorff
+# Website: http://www.refining-linux.org/
+# 
+# Add SSH key to a backup user for passwordless login
+##
+
+if [ "$1" == "" ] || [ "$2" == "" ] || [ "$3" == "" ]; then
+	echo "Usage: $(basename $0) <remote host> <remote username> <ssh public key file>"
+	exit
+fi
+
+. /usr/local/etc/rs-backup/server-config
+
+home_dir="${BACKUP_ROOT}/${1}-${2}"
+
+mkdir -p "${home_dir}/.ssh"
+
+# Add public key to authorized_keys file and restrict shell commands
+echo -n "command=\"/usr/local/bin/rs-run-ssh-cmd '${home_dir}'\" " >> "${home_dir}/.ssh/authorized_keys"
+cat "$3" >> "${home_dir}/.ssh/authorized_keys"
+
+# Protect SSH config by assigning ownership to root
+chown -R root:root "${home_dir}/.ssh"
+chmod 0755 "${home_dir}/.ssh"
+chmod 0644 "${home_dir}/.ssh/authorized_keys"

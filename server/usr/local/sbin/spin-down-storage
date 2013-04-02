@@ -1,0 +1,22 @@
+#!/bin/sh
+# Check if disk has been used since last check and spin it down if not
+
+if [ "${1}" == "" ]; then
+	echo "Usage: $(basename ${0}) <device file>"
+	exit
+fi
+
+last_state_file="/tmp/storage-state-${1}"
+
+touch $last_state_file
+chmod 600 $last_state_file
+
+new_storage_state=$(cat /proc/diskstats | grep "$1")
+old_storage_state=$(cat $last_state_file)
+
+if [ "$new_storage_state" = "$old_storage_state" ]; then
+	sync
+	sdparm --flexible --readonly --command=stop /dev/$1 2>&1 > /dev/null
+fi
+
+echo "$new_storage_state" > $last_state_file

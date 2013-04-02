@@ -1,0 +1,37 @@
+#!/bin/sh
+# Create daily, weekly or monthly snapshots from manual push backups
+
+if [ "$1" == "" ]; then
+	echo "Usage: $(basename $0) <backup level>"
+	exit
+fi
+
+. /usr/local/etc/rs-backup/server-config
+
+for home_dir in "${BACKUP_ROOT}"/*; do
+	if [ -d "${home_dir}/${FILES_DIR}" ] && [ -e "${home_dir}/rsnapshot.conf" ]; then
+		# Since we're relying on the client to push changes, there isn't
+		# necessarily a new increment pushed yet.
+		# Only rotate if there are really new increments to prevent
+		# successive backup deletion
+		config=$(cat "${BACKUP_ROOT}/etc/rsnapshot.global.conf")
+
+		# Get number of preceding increments
+		config=$(echo "${config}" | grep -P '^retain\t')
+		config=$(echo "${config}" | grep -oPz "retain\t+(\w+)\t+(\d+)\nretain\s+${1}\t+" | sed -n 1p)
+		preceding_name=$(echo "${config}" | awk '{ print $2 }')
+		preceding_number=$(($(echo "${config}" | awk ' { print $3 }') - 1))
+		
+		# Continue if no proper preceding increment could be found
+		if [ "${preceding_name}" == "" ] || 
+		   [ ! -d "${home_dir}/${FILES_DIR}/${preceding_name}.${preceding_number}" ]; then
+			echo "Not rotating ${1}"
+			continue
+		fi
+
+		cd "${home_dir}/${FILES_DIR}"
+		owner=$(ls -ld "${home_dir}/${FILES_DIR}" | awk '{ print $3 }')
+
+		su - "${owner}" -c "rsnapshot -c '${home_dir}/rsnapshot.conf' '$1'"
+	fi
+done

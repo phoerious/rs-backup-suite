@@ -1,0 +1,53 @@
+#!/bin/sh
+##
+# rs-add-user
+# Copyright (C) 2013 by Janek Bevendorff
+# Website: http://www.refining-linux.org/
+# 
+# Set up a backup user
+##
+
+if [ "$1" == "" ] || [ "$2" == "" ]; then
+	echo "Usage: $(basename $0) <remote host> <remote username> [<ssh public key file>]"
+	exit
+fi
+
+. /usr/local/etc/rs-backup/server-config
+
+remote_hostname="$1"
+remote_username="$2"
+ssh_key_file="$3"
+local_username="${remote_hostname}-${remote_username}"
+
+useradd -G backup -b "${BACKUP_ROOT}" -m -k /etc/rs-skel -p '*' -s /bin/sh "${local_username}"
+rs-update-passwd
+
+# Generate config files from templates
+USERNAME="${local_username}"
+GROUPNAME="${local_username}"
+HOME_DIR="${BACKUP_ROOT}/${local_username}"
+
+rsync_conf="$(cat /usr/local/etc/rs-backup/rsync.conf.template)"
+rsnapshot_conf="$(cat /usr/local/etc/rs-backup/rsnapshot.conf.template)"
+
+rsync_conf=$(eval "cat << EOF
+${rsync_conf}
+EOF")
+
+rsnapshot_conf=$(eval "cat << EOF
+${rsnapshot_conf}
+EOF")
+
+echo "${rsync_conf}" > "${HOME_DIR}/rsync.conf"
+echo "${rsnapshot_conf}" > "${HOME_DIR}/rsnapshot.conf"
+
+# Protect config files
+chown root:root "${HOME_DIR}/rsync.conf"
+chmod 0644 "${HOME_DIR}/rsync.conf"
+chown root:root "${HOME_DIR}/rsnapshot.conf"
+chmod 0644 "${HOME_DIR}/rsnapshot.conf"
+
+# If SSH key file has been specified
+if [ "${ssh_key_file}" != "" ]; then
+	rs-add-ssh-key "${remote_hostname}" "${remote_username}" "${ssh_key_file}"
+fi

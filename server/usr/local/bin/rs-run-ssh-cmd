@@ -1,0 +1,13 @@
+#!/bin/sh
+
+home_dir=$1
+
+if [ "${SSH_ORIGINAL_COMMAND}" == "internal-sftp" ] || [ "${SSH_ORIGINAL_COMMAND}" == "/usr/lib/ssh/sftp-server" ]; then
+	cd "${home_dir}/files"
+	exec /usr/lib/ssh/sftp-server -R
+else
+	exec /usr/bin/rsync --server --daemon --config="${home_dir}/rsync.conf" .
+fi
+
+echo "Session failed." >&2
+exit 1

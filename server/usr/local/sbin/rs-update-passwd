@@ -1,0 +1,11 @@
+#!/bin/sh
+
+. /usr/local/etc/rs-backup/server-config
+
+# Take precautions :-)
+if [ "${BACKUP_ROOT}" == "" ] || [ "$(realpath ${BACKUP_ROOT})" == "/" ]; then
+	echo "Sorry, won't overwrite real '/etc/passwd'!"
+	exit 1
+fi
+
+cat /etc/passwd | grep "::${BACKUP_ROOT}/[^/:]\+:/bin/sh$" > "${BACKUP_ROOT}/etc/passwd"

@@ -1,0 +1,11 @@
+*.tmp
+*.swp
+.directory
+Thumbs.db
+desktop.ini
+Desktop.ini
+.DS_Store
+
+server/usr/local/etc/rs-backup/server-config
+client/usr/local/etc/rs-backup/client-config
+client/usr/local/etc/rs-backup/include-files

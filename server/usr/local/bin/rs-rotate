@@ -1,0 +1,15 @@
+#!/bin/sh
+
+if [ "$1" == "" ]; then
+	echo "Usage: $(basename $0) <rsnapshot config>"
+	exit
+fi
+
+if [ "$RSYNC_EXIT_STATUS" == "" ]; then
+	echo "This script is intended to be run as rsync post-xfer hook." 2>&1
+	exit 1
+fi
+
+if [ $RSYNC_EXIT_STATUS -eq 0 ]; then
+       	rsnapshot -c "$1" push
+fi

@@ -1,0 +1,26 @@
+# List of files and folders to include in a system-wide backup.
+# 
+# NOTE: you should only specify files that are part of the
+# system and/or owned by root. Home directories should be backed
+# up by the users themselves as this will keep file access rights
+# separate on the backup server.
+# 
+# For help with the syntax of this file consult the FILTER RULES
+# section of the rsync(1) man page.
+
+- .directory
+- Thumbs.db
+- desktop.ini
+- Desktop.ini
+- .DS_Store
+- *.tmp
+- *.swp
+- lost+found/***
+
+/etc/***
+/usr
+/usr/etc/***
+/usr/share/***
+/usr/local
+/usr/local/etc/***
+/usr/local/share/***

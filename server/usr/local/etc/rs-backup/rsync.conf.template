@@ -1,0 +1,20 @@
+[push]
+uid = ${USERNAME}
+gid = ${GROUPNAME}
+path = ${HOME_DIR}/${FILES_DIR}/.sync
+use chroot = 0
+read only = 0
+write only = 1
+log file = ${HOME_DIR}/rsync.log
+fake super = 1
+max connections = 1
+lock file = ${HOME_DIR}/rsyncd.lock
+post-xfer exec = /usr/local/bin/rs-rotate "${HOME_DIR}/rsnapshot.conf"
+
+[pull]
+uid = ${USERNAME}
+gid = ${GROUPNAME}
+path = ${HOME_DIR}/${FILES_DIR}
+use chroot = 0
+read only = 1
+fake super = 1

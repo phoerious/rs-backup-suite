@@ -1,0 +1,6 @@
+include_conf	${BACKUP_ROOT}/etc/rsnapshot.global.conf
+
+snapshot_root	${HOME_DIR}/${FILES_DIR}
+logfile			${HOME_DIR}/rsnapshot.log
+lockfile		${HOME_DIR}/rsnapshot.pid
+backup			${HOME_DIR}/${FILES_DIR}/.sync	./
