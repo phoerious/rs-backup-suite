@@ -94,5 +94,18 @@ Lines that start with a `-` are treated as excludes, all other lines as includes
 
 **NOTE:** To include a directory you need to mark all parent directories for inclusion, too. For instance to include `/home/johndoe` you also need to include `/home` as shown above. But don't confuse `/home` with `/home/`! `/home` without the trailing slash only selects the (empty) directory itself, not its contents.
 
+## Restoring files from the NAS
+To restore files from the NAS server simply run:
+
+    rsync -a -e ssh backupuser@remotehost::pull/source/path /destination/path
+
+Replace `backupuser` with the proper backup user (e.g. `mymachine-johndoe`) and `remotehost` with the hostname of the NAS. `/source/path` is the file name on the remote side (e.g. `/daily.2/home/johndoe/foobar`) and `/destination/path` is the local destination file name.
+
+You can also log into the NAS using SFTP or SSHFS. This is probably more convenient for browsing available files.
+
+Be aware that both access methods are strictly read-only! Write access is only granted via rsync through the `push` module:
+
+    rsync -a -e ssh backupuser@remotehost::push/destination/path /source/path
+
 ## Side note
 Because rs-backup-suite uses rsync for the client-server communication you don't necessarily need both parts. As long as you have a working rsync server on your NAS you can use the client script to push files to it. On the other hand you can use the rs-backup-suite server part with any other rsync client, as well.
