@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Create daily, weekly or monthly snapshots from manual push backups
 
 if [ "$1" == "" ]; then
