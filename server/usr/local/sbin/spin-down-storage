@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Check if disk has been used since last check and spin it down if not
 
 if [ "${1}" == "" ]; then
