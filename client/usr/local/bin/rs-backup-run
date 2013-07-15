@@ -21,13 +21,14 @@
 # Additional internal config
 ###############################################################################
 
-_VERSION=0.1
+_VERSION=0.11
 _GLOBAL_INCLUSION_PATTERN_FILE="/usr/local/etc/rs-backup/include-files"
 _FORCED_INCLUSION_PATTERN_FILE=""
 _SKIP_HOME_DIRS=false
 _FORCED_LOG_FILE=""
 _QUIET_MODE=false
 _VERBOSE_MODE=false
+_SHOW_PROGRESS=false		# Option to display file transfer progress
 _DRY_RUN=false
 _FORCE_RUN=false
 _ERROR_COUNT=0
@@ -81,6 +82,7 @@ Options:
  -q, --quiet		  Don't print any error messages or warnings to the
  			  screen (only write to log file)
  -v, --verbose		  Print all messages of the current debug level
+ -p, --progress		  Print file transfer information to the terminal
  -h, --help		  Print this help and exit
 HELP
 }
@@ -228,19 +230,21 @@ perform_backup() {
 	local msg
 	local backup_cmd
 	local ssh_cmd
-	local rsync_opts
+	local rsync_opts="${RSNC_OPTIONS}"
 	local exit_code
-	local tee_device="/dev/null"
+	local tee_device="/dev/tty"
 
 	if $_DRY_RUN; then
-		rsync_opts="${RSYNC_OPTIONS} --dry-run"
+		rsync_opts+=" --dry-run"
 	fi
-
-	if $_VERBOSE_MODE; then
-		tee_device="/dev/tty"
-		rsync_opts="${RSYNC_OPTIONS} --verbose"
+	
+	if $_SHOW_PROGRESS; then
+		rsync_opts+=" --progress"	# append to rsync_opts: preserves other options (e.g. --dry-run)
+	elif $_VERBOSE_MODE; then		# --progress implies --verbose
+		rsync_opts+=" --verbose"
 	else
-		rsync_opts="${RSYNC_OPTIONS} --quiet"
+		tee_device="/dev/null"
+		rsync_opts+=" --quiet"
 	fi
 
 	if [ "${username}" == "" ]; then
@@ -257,7 +261,7 @@ perform_backup() {
 	fi
 
 	if [ "${SSH_OPTIONS}" != "" ]; then
-		ssh_cmd="ssh"$(echo -n "${SSH_OPTIONS}" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g')
+		ssh_cmd="ssh "$(echo -n "${SSH_OPTIONS}" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g')		# added missing space
 	else
 		ssh_cmd="ssh"
 	fi
@@ -382,8 +386,8 @@ parse_cmd_args() {
 	
 	args=$(getopt \
 		-s sh \
-		-o "r:o:nsi:l:fqvh" \
-		-l "remote-host:,remote-user:,push-module:,ssh-options:,rsync-options:,dry-run,no-home-dirs,include-from:,log-level:,log-file:,force-run,quiet,verbose,help" \
+		-o "r:o:nsi:l:fqvph" \
+		-l "remote-host:,remote-user:,push-module:,ssh-options:,rsync-options:,dry-run,no-home-dirs,include-from:,log-level:,log-file:,force-run,quiet,verbose,progress,help" \
 		-n "${name}" \
 		-- "${@}")
 
@@ -438,6 +442,9 @@ parse_cmd_args() {
 				shift ;;
 			"-v"|"--verbose")
 				! $_QUIET_MODE && _VERBOSE_MODE=true
+				shift ;;
+			"-p"|"--progress")
+				! $_QUIET_MODE && _SHOW_PROGRESS=true
 				shift ;;
 			"-h"|"--help")
 				print_help
