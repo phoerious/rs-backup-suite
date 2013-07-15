@@ -51,7 +51,7 @@ chmod 0644 "${HOME_DIR}/rsnapshot.conf"
 mkdir -p "${HOME_DIR}/${FILES_DIR}/.sync"
 
 # Set permissions for backup directory
-chown -R "${USERNAME}":"${GROUPNAME}" "${HOME_DIR}/${FILES_DIR}/.sync"
+chown -R ${USERNAME}:${GROUPNAME} "${HOME_DIR}/${FILES_DIR}/.sync"
 chmod -R 0755 "${HOME_DIR}/${FILES_DIR}/.sync"
 
 # If SSH key file has been specified
