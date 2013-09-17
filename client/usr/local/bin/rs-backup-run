@@ -28,7 +28,7 @@ _SKIP_HOME_DIRS=false
 _FORCED_LOG_FILE=""
 _QUIET_MODE=false
 _VERBOSE_MODE=false
-_SHOW_PROGRESS=false		# Option to display file transfer progress
+_SHOW_PROGRESS=false
 _DRY_RUN=false
 _FORCE_RUN=false
 _ERROR_COUNT=0
@@ -42,7 +42,7 @@ _ERROR_COUNT=0
 # 
 # Usage: print_help
 print_help() {
-	cat << HELP
+    cat << HELP
 rs-backup-run  version ${_VERSION}
 Copyright (C) 2013 by Janek Bevendorff
 Web site: http://www.refining-linux.org/
@@ -59,31 +59,31 @@ user will be backed up.
 Usage: $(basename $0) [OPTION]...
 
 Options:
- -r, --remote-host=HOST	  The remote host to connect to
-     --remote-user=NAME	  The username to use for logging into the remote server
-     			  (%h will be replaced with the host name of  this
-			  machine and %u with your username)
-     --push-module=NAME	  The remote rsync server module
-     --ssh-options=OPTS	  Additional SSH options (will be merged with the default
-     			  options set in the rs-backup client-config file)
+ -r, --remote-host=HOST   The remote host to connect to
+     --remote-user=NAME   The username to use for logging into the remote server
+                          (%h will be replaced with the host name of  this
+                          machine and %u with your username)
+     --push-module=NAME   The remote rsync server module
+     --ssh-options=OPTS   Additional SSH options (will be merged with the default
+                          ptions set in the rs-backup client-config file)
  -o, --rsync-options=OPTS Additional options for rsync
- -n, --dry-run		  Perform a test run (same as the --dry-run option for
- 			  rsync). Enable --verbose mode for useful control output
- -s, --no-home-dirs	  Don't back up home dirs, only perform global system
- 			  backup (root only)
+ -n, --dry-run            Perform a test run (same as the --dry-run option for
+                          rsync). Enable --verbose mode for useful control output
+ -s, --no-home-dirs       Don't back up home dirs, only perform global system
+                          backup (root only)
  -i, --include-from=FILE  Specify an alternate inclusion pattern file
- 			  This will override the default setting. If the script
-			  is run as root, only the system backup will be
-			  performed, no additional home directories will be
-			  backed up
- -l, --log-level=NUM	  Set log level to NUM (between 0 and 4)
-     --log-file=FILE	  Set a different log file location
- -f, --force-run	  Force rs-backup to run, even if a lock file exists
- -q, --quiet		  Don't print any error messages or warnings to the
- 			  screen (only write to log file)
- -v, --verbose		  Print all messages of the current debug level
- -p, --progress		  Print file transfer information to the terminal
- -h, --help		  Print this help and exit
+                          This will override the default setting. If the script
+                          is run as root, only the system backup will be
+                          performed, no additional home directories will be
+                          backed up
+ -l, --log-level=NUM      Set log level to NUM (between 0 and 4)
+     --log-file=FILE      Set a different log file location
+ -f, --force-run          Force rs-backup to run, even if a lock file exists
+ -q, --quiet              Don't print any error messages or warnings to the
+                          screen (only write to log file)
+ -v, --verbose            Print all messages of the current debug level
+ -p, --progress           Print file transfer information to the terminal
+ -h, --help               Print this help and exit
 HELP
 }
 
@@ -92,53 +92,53 @@ HELP
 # Usage: write_log <log level>  <log message>
 # 
 write_log() {
-	local log_msg
-	local log_date
-	local log_dest
+    local log_msg
+    local log_date
+    local log_dest
 
-	if [ $1 -gt 0 ] && [ $1 -le $LOG_LEVEL ]; then
-		case $1 in
-			1) log_msg="ERROR: ${2}" ;;
-			2) log_msg="WARNING: ${2}" ;;
-			3) log_msg="INFO: ${2}" ;;
-			*) log_msg="DEBUG: ${2}" ;;
-		esac
+    if [ $1 -gt 0 ] && [ $1 -le $LOG_LEVEL ]; then
+        case $1 in
+            1) log_msg="ERROR: ${2}" ;;
+            2) log_msg="WARNING: ${2}" ;;
+            3) log_msg="INFO: ${2}" ;;
+            *) log_msg="DEBUG: ${2}" ;;
+        esac
 
-		log_date="[$(date)]"
-		full_log_msg="${log_date} ${log_msg}"
-		
-		if [ "${_FORCED_LOG_FILE}" != "" ]; then
-			log_dest=${_FORCED_LOG_FILE}
-		elif [ $(id -u) -eq 0 ]; then
-			log_dest=${LOG_FILE}
-		elif [ "${HOME}" != "" ] && [ "${USER_LOG_FILE}" != "" ]; then
-			log_dest=${HOME}/${USER_LOG_FILE}
-		else
-			echo "WARNING: Couldn't determine valid log file location, using '/var/tmp'..." >&2
-			log_dest="/var/tmp/${LOG_FILE}"
-		fi
+        log_date="[$(date)]"
+        full_log_msg="${log_date} ${log_msg}"
+        
+        if [ "${_FORCED_LOG_FILE}" != "" ]; then
+            log_dest=${_FORCED_LOG_FILE}
+        elif [ $(id -u) -eq 0 ]; then
+            log_dest=${LOG_FILE}
+        elif [ "${HOME}" != "" ] && [ "${USER_LOG_FILE}" != "" ]; then
+            log_dest=${HOME}/${USER_LOG_FILE}
+        else
+            echo "WARNING: Couldn't determine valid log file location, using '/var/tmp'..." >&2
+            log_dest="/var/tmp/${LOG_FILE}"
+        fi
 
-		if ! test_file_perms "w" "${log_dest}"; then
-			echo "ERROR: Couldn't open log file for writing, redirecting to STDOUT!" >&2
-			echo "${log_date} ${log_msg}" >&1
-		else
-			echo "${log_date} ${log_msg}" >> "${log_dest}"
-		fi
+        if ! test_file_perms "w" "${log_dest}"; then
+            echo "ERROR: Couldn't open log file for writing, redirecting to STDOUT!" >&2
+            echo "${log_date} ${log_msg}" >&1
+        else
+            echo "${log_date} ${log_msg}" >> "${log_dest}"
+        fi
 
-		if ! $_QUIET_MODE && [ $1 -eq 1 ]; then
-			$_VERBOSE_MODE || $PRINT_ERRORS && echo "${log_msg}" >&2
-		elif ! $_QUIET_MODE && [ $1 -le 2 ]; then
-			$_VERBOSE_MODE || $PRINT_WARNINGS && echo "${log_msg}" >&2
-		elif ! $_QUIET_MODE && [ $1 -gt 2 ]; then
-			$_VERBOSE_MODE && echo "${log_msg}" >&1
-		fi
+        if ! $_QUIET_MODE && [ $1 -eq 1 ]; then
+            $_VERBOSE_MODE || $PRINT_ERRORS && echo "${log_msg}" >&2
+        elif ! $_QUIET_MODE && [ $1 -le 2 ]; then
+            $_VERBOSE_MODE || $PRINT_WARNINGS && echo "${log_msg}" >&2
+        elif ! $_QUIET_MODE && [ $1 -gt 2 ]; then
+            $_VERBOSE_MODE && echo "${log_msg}" >&1
+        fi
 
-	fi
+    fi
 
-	# Increase error count
-	if [ $1 -eq 1 ]; then
-		_ERROR_COUNT=$(($_ERROR_COUNT + 1))
-	fi
+    # Increase error count
+    if [ $1 -eq 1 ]; then
+        _ERROR_COUNT=$(($_ERROR_COUNT + 1))
+    fi
 }
 
 
@@ -147,19 +147,19 @@ write_log() {
 # Usage: test_file_perms <mode: r|w|rw> <filename>
 # 
 test_file_perms() {
-	local perms=$1
-	local filename=$2
-	local result
+    local perms=$1
+    local filename=$2
+    local result
 
-	if [ "${perms}" == "r" ]; then
-		[ -f "${filename}" ] && [ -r "${filename}" ]
-	elif [ "${perms}" == "w" ]; then
-		[ -f "${filename}" -a -w "${filename}" ] || [ ! -e "${2}" -a -w "$(dirname ${2})" ]
-	elif [ "${perms}" == "rw" ]; then
-		[ -f "${filename}" ] && [ -w "${filename}" ] && [ -r "${filename}" ]
-	fi
+    if [ "${perms}" == "r" ]; then
+        [ -f "${filename}" ] && [ -r "${filename}" ]
+    elif [ "${perms}" == "w" ]; then
+        [ -f "${filename}" -a -w "${filename}" ] || [ ! -e "${2}" -a -w "$(dirname ${2})" ]
+    elif [ "${perms}" == "rw" ]; then
+        [ -f "${filename}" ] && [ -w "${filename}" ] && [ -r "${filename}" ]
+    fi
 
-	return $?	
+    return $?    
 }
 
 # Generate and return remote user name for SSH login
@@ -167,18 +167,18 @@ test_file_perms() {
 # Usage: get_remote_username [<local username>] [<local hostname>]
 # 
 get_remote_username() {
-	local username=$1
-	local hostname=$2
+    local username=$1
+    local hostname=$2
 
-	if [ "${username}" == "" ]; then
-		username=$(id -un)
-	fi
+    if [ "${username}" == "" ]; then
+        username=$(id -un)
+    fi
 
-	if [ "${hostname}" == "" ]; then
-		hostname=$(hostname)
-	fi
+    if [ "${hostname}" == "" ]; then
+        hostname=$(hostname)
+    fi
 
-	echo $(echo ${REMOTE_USER} | sed "s/%h/${hostname}/" | sed "s/%u/${username}/")
+    echo $(echo ${REMOTE_USER} | sed "s/%h/${hostname}/" | sed "s/%u/${username}/")
 }
 
 # Get a stripped down version of the /etc/passwd file with all non-system users,
@@ -188,33 +188,33 @@ get_remote_username() {
 # Usage: get_processed_passwd_file
 # 
 get_processed_passwd_file() {
-	local line
-	local username
-	local uid
-	local gid
-	local home_dir
-	local shell
+    local line
+    local username
+    local uid
+    local gid
+    local home_dir
+    local shell
 
-	cat /etc/passwd | while read line; do
-		uid=$(echo -n "${line}" | cut -d ":" -f 3)
-		
-		if [ $uid -lt 1000 ]; then
-			continue
-		fi
+    cat /etc/passwd | while read line; do
+        uid=$(echo -n "${line}" | cut -d ":" -f 3)
+        
+        if [ $uid -lt 1000 ]; then
+            continue
+        fi
 
-		home_dir=$(echo -n "${line}" | cut -d ":" -f 6)
-		home_dir=$(realpath "${home_dir}")
+        home_dir=$(echo -n "${line}" | cut -d ":" -f 6)
+        home_dir=$(realpath "${home_dir}")
 
-		if [ ! -d "${home_dir}" ]; then
-			continue
-		fi
+        if [ ! -d "${home_dir}" ]; then
+            continue
+        fi
 
-		username=$(echo -n "${line}" | cut -d ":" -f 1)
-		gid=$(echo -n "${line}" | cut -d ":" -f 4)
-		shell=$(echo -n "${line}" | cut -d ":" -f 7)
+        username=$(echo -n "${line}" | cut -d ":" -f 1)
+        gid=$(echo -n "${line}" | cut -d ":" -f 4)
+        shell=$(echo -n "${line}" | cut -d ":" -f 7)
 
-		echo "${username}:x:${uid}:${gid}::${home_dir}:${shell}"
-	done
+        echo "${username}:x:${uid}:${gid}::${home_dir}:${shell}"
+    done
 }
 
 # Back up a directory.
@@ -224,82 +224,82 @@ get_processed_passwd_file() {
 # Usage: perform_backup <inclusion pattern file> <destination> [<username>]
 # 
 perform_backup() {
-	local inclusion_pattern_file=$1
-	local destination=$2
-	local username=$3
-	local msg
-	local backup_cmd
-	local ssh_cmd
-	local rsync_opts="${RSNC_OPTIONS}"
-	local exit_code
-	local tee_device="/dev/tty"
+    local inclusion_pattern_file=$1
+    local destination=$2
+    local username=$3
+    local msg
+    local backup_cmd
+    local ssh_cmd
+    local rsync_opts="${RSNC_OPTIONS}"
+    local exit_code
+    local tee_device="/dev/tty"
 
-	if $_DRY_RUN; then
-		rsync_opts+=" --dry-run"
-	fi
-	
-	if $_SHOW_PROGRESS; then
-		rsync_opts+=" --progress"	# append to rsync_opts: preserves other options (e.g. --dry-run)
-	elif $_VERBOSE_MODE; then		# --progress implies --verbose
-		rsync_opts+=" --verbose"
-	else
-		tee_device="/dev/null"
-		rsync_opts+=" --quiet"
-	fi
+    if $_DRY_RUN; then
+        rsync_opts+=" --dry-run"
+    fi
+    
+    if $_SHOW_PROGRESS; then
+        rsync_opts+=" --progress"    # append to rsync_opts: preserves other options (e.g. --dry-run)
+    elif $_VERBOSE_MODE; then        # --progress implies --verbose
+        rsync_opts+=" --verbose"
+    else
+        tee_device="/dev/null"
+        rsync_opts+=" --quiet"
+    fi
 
-	if [ "${username}" == "" ]; then
-		username=$(id -un)
-	fi
+    if [ "${username}" == "" ]; then
+        username=$(id -un)
+    fi
 
-	if [ "${_FORCED_INCLUSION_PATTERN_FILE}" != "" ]; then
-		inclusion_pattern_file=${_FORCED_INCLUSION_PATTERN_FILE}
-	fi
+    if [ "${_FORCED_INCLUSION_PATTERN_FILE}" != "" ]; then
+        inclusion_pattern_file=${_FORCED_INCLUSION_PATTERN_FILE}
+    fi
 
-	if ! test_file_perms "r" "${inclusion_pattern_file}"; then
-		write_log 1 "Pattern file '${inclusion_pattern_file}' does not exist or is not readable!"
-		return 1
-	fi
+    if ! test_file_perms "r" "${inclusion_pattern_file}"; then
+        write_log 1 "Pattern file '${inclusion_pattern_file}' does not exist or is not readable!"
+        return 1
+    fi
 
-	if [ "${SSH_OPTIONS}" != "" ]; then
-		ssh_cmd="ssh "$(echo -n "${SSH_OPTIONS}" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g')		# added missing space
-	else
-		ssh_cmd="ssh"
-	fi
+    if [ "${SSH_OPTIONS}" != "" ]; then
+        ssh_cmd="ssh "$(echo -n "${SSH_OPTIONS}" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g')        # added missing space
+    else
+        ssh_cmd="ssh"
+    fi
 
-	backup_cmd="rsync \
-		--rsh=\"${ssh_cmd}\" \
-		--archive \
-		--acls \
-		--delete \
-		--delete-excluded \
-		--include-from=\"${inclusion_pattern_file}\" \
-		--exclude=\"*\" \
-		${rsync_opts} \
-		/ \
-		\"${destination}\""
+    backup_cmd="rsync \
+        --rsh=\"${ssh_cmd}\" \
+        --archive \
+        --acls \
+        --delete \
+        --delete-excluded \
+        --include-from=\"${inclusion_pattern_file}\" \
+        --exclude=\"*\" \
+        ${rsync_opts} \
+        / \
+        \"${destination}\""
 
-	write_log 4 "This is the command about to be run: $(echo ${backup_cmd})"
+    write_log 4 "This is the command about to be run: $(echo ${backup_cmd})"
 
-	set -o pipefail
+    set -o pipefail
 
-	if [ $(id -u) -eq 0 ] && [ "${username}" != "$(id -un)" ]; then
-		write_log 4 "Running backup with privileges of user '${username}' (UID: $(id -u ${username}))..."
-		msg=$(su - "${username}" -c "${backup_cmd}" 2>&1 | tee "${tee_device}")
-	elif [ $(id -u) -ne 0 ] && [ "${username}" != "$(id -un)" ]; then
-		write_log 1 "Cannot run run backup as user '${username}' (UID: $(id -u ${username}), missing root privileges!"
-		return 1
-	else
-		msg=$(sh -c "${backup_cmd}" 2>&1 | tee "${tee_device}")
-	fi
+    if [ $(id -u) -eq 0 ] && [ "${username}" != "$(id -un)" ]; then
+        write_log 4 "Running backup with privileges of user '${username}' (UID: $(id -u ${username}))..."
+        msg=$(su - "${username}" -c "${backup_cmd}" 2>&1 | tee "${tee_device}")
+    elif [ $(id -u) -ne 0 ] && [ "${username}" != "$(id -un)" ]; then
+        write_log 1 "Cannot run run backup as user '${username}' (UID: $(id -u ${username}), missing root privileges!"
+        return 1
+    else
+        msg=$(sh -c "${backup_cmd}" 2>&1 | tee "${tee_device}")
+    fi
 
-	exit_code=$?
+    exit_code=$?
 
-	if [ ${exit_code} -ne 0 ]; then
-		write_log 1 "Backup failed! Error message: ${msg}"
-		return ${exit_code}
-	else
-		write_log 3 "Backup finished."
-	fi
+    if [ ${exit_code} -ne 0 ]; then
+        write_log 1 "Backup failed! Error message: ${msg}"
+        return ${exit_code}
+    else
+        write_log 3 "Backup finished."
+    fi
 }
 
 # Back up selected system files
@@ -307,51 +307,51 @@ perform_backup() {
 # Usage: back_up_system
 #
 back_up_system() {
-	if [ $(id -u) -ne 0 ]; then
-		write_log 1 "Cannot perform system backup unless run as root!"
-		return 1
-	fi
+    if [ $(id -u) -ne 0 ]; then
+        write_log 1 "Cannot perform system backup unless run as root!"
+        return 1
+    fi
 
-	write_log 4 "Entering directory '/root'..."
-	cd /root
+    write_log 4 "Entering directory '/root'..."
+    cd /root
 
-	if $_DRY_RUN; then
-		write_log 3 "Starting global system backup (DRY RUN)..."
-	else
-		write_log 3 "Starting global system backup..."
-	fi
-	perform_backup "${_GLOBAL_INCLUSION_PATTERN_FILE}" "$(get_remote_username root)@${REMOTE_HOST}::${PUSH_MODULE}"
+    if $_DRY_RUN; then
+        write_log 3 "Starting global system backup (DRY RUN)..."
+    else
+        write_log 3 "Starting global system backup..."
+    fi
+    perform_backup "${_GLOBAL_INCLUSION_PATTERN_FILE}" "$(get_remote_username root)@${REMOTE_HOST}::${PUSH_MODULE}"
 }
 
 # Back up single home directory
 # 
 # Usage: back_up_single_home_dir <home dir> <username>
 # 
-back_up_single_home_dir() {	
-	local home_dir=$(realpath "${1}")
-	local username=$2
-	
-	# Don't back up home directory if no files are marked for backup
-	if [ ! -f "${home_dir}/${INCLUSION_PATTERN_FILE}" ]; then
-		write_log 4 "Skipping '${home_dir}', because '${INCLUSION_PATTERN_FILE}' does not exist." 
-		return
-	fi
-	
-	# Also don't create a backup if no SSH key exists and no custom SSH options were specified
-	if [ ! -f "${home_dir}/.ssh/id_rsa" ] && [ ! -f "${home_dir}/.ssh/config" ] && [ "${SSH_OPTIONS}" == "" ]; then
-		write_log 4 "Skipping '${home_dir}', because no proper SSH key could be found."
-		return
-	fi
-	
-	write_log 4 "Entering directory '${home_dir}'..."
-	cd "${home_dir}"
+back_up_single_home_dir() {    
+    local home_dir=$(realpath "${1}")
+    local username=$2
+    
+    # Don't back up home directory if no files are marked for backup
+    if [ ! -f "${home_dir}/${INCLUSION_PATTERN_FILE}" ]; then
+        write_log 4 "Skipping '${home_dir}', because '${INCLUSION_PATTERN_FILE}' does not exist." 
+        return
+    fi
+    
+    # Also don't create a backup if no SSH key exists and no custom SSH options were specified
+    if [ ! -f "${home_dir}/.ssh/id_rsa" ] && [ ! -f "${home_dir}/.ssh/config" ] && [ "${SSH_OPTIONS}" == "" ]; then
+        write_log 4 "Skipping '${home_dir}', because no proper SSH key could be found."
+        return
+    fi
+    
+    write_log 4 "Entering directory '${home_dir}'..."
+    cd "${home_dir}"
 
-	if $_DRY_RUN; then
-		write_log 3 "Starting backup of '${home_dir}' (DRY RUN)..."
-	else
-		write_log 3 "Starting backup of '${home_dir}'..."
-	fi
-	perform_backup "${home_dir}/${INCLUSION_PATTERN_FILE}" "$(get_remote_username ${username})@${REMOTE_HOST}::${PUSH_MODULE}" "${username}"
+    if $_DRY_RUN; then
+        write_log 3 "Starting backup of '${home_dir}' (DRY RUN)..."
+    else
+        write_log 3 "Starting backup of '${home_dir}'..."
+    fi
+    perform_backup "${home_dir}/${INCLUSION_PATTERN_FILE}" "$(get_remote_username ${username})@${REMOTE_HOST}::${PUSH_MODULE}" "${username}"
 }
 
 # Back up all home dirs
@@ -359,11 +359,11 @@ back_up_single_home_dir() {
 # Usage: back_up_home_dirs
 # 
 back_up_home_dirs() {
-	write_log 3 "Starting backup of all home directories..."
+    write_log 3 "Starting backup of all home directories..."
 
-	get_processed_passwd_file | while read line; do
-		back_up_single_home_dir "$(echo -n ${line} | cut -d ':' -f 6)" "$(echo -n ${line} | cut -d ':' -f 1)"
-	done
+    get_processed_passwd_file | while read line; do
+        back_up_single_home_dir "$(echo -n ${line} | cut -d ':' -f 6)" "$(echo -n ${line} | cut -d ':' -f 1)"
+    done
 }
 
 # Prase command line args
@@ -371,89 +371,89 @@ back_up_home_dirs() {
 # Usage: parse_cmd_args <cmd arg line>
 # 
 parse_cmd_args() {
-	local args
-	local name=$(basename $0)
+    local args
+    local name=$(basename $0)
 
-	if [ "$1" == "" ]; then
-		return
-	fi
+    if [ "$1" == "" ]; then
+        return
+    fi
 
-	getopt -T > /dev/null
-	if [ $? -ne 4 ]; then
-		write_log 1 "Need GNU getopt for command line parameter parsing!"
-		exit 1;
-	fi
-	
-	args=$(getopt \
-		-s sh \
-		-o "r:o:nsi:l:fqvph" \
-		-l "remote-host:,remote-user:,push-module:,ssh-options:,rsync-options:,dry-run,no-home-dirs,include-from:,log-level:,log-file:,force-run,quiet,verbose,progress,help" \
-		-n "${name}" \
-		-- "${@}")
+    getopt -T > /dev/null
+    if [ $? -ne 4 ]; then
+        write_log 1 "Need GNU getopt for command line parameter parsing!"
+        exit 1;
+    fi
+    
+    args=$(getopt \
+        -s sh \
+        -o "r:o:nsi:l:fqvph" \
+        -l "remote-host:,remote-user:,push-module:,ssh-options:,rsync-options:,dry-run,no-home-dirs,include-from:,log-level:,log-file:,force-run,quiet,verbose,progress,help" \
+        -n "${name}" \
+        -- "${@}")
 
-	if [ $? -ne 0 ]; then
-		exit 1
-	fi
+    if [ $? -ne 0 ]; then
+        exit 1
+    fi
 
-	eval set -- "${args}"
+    eval set -- "${args}"
 
-	while true; do
-		case "$1" in
-			"-r"|"--remote-host")
-				REMOTE_HOST=$2
-				shift 2 ;;
-			"--remote-user")
-				REMOTE_USER=$2
-				shift 2 ;;
-			"--push-module")
-				PUSH_MODULE=$2
-				shift 2 ;;
-			"--ssh-options")
-				SSH_OPTIONS="${SSH_OPTIONS} ${2}"
-				shift 2 ;;
-			"-o"|"--rsync-options")
-				RSYNC_OPTIONS="${RSYNC_OPTIONS} $2"
-				shift 2 ;;
-			"-n"|"--dry-run")
-				_DRY_RUN=true
-				shift ;;
-			"-s"|"--no-home-dirs")
-				_SKIP_HOME_DIRS=true
-				shift ;;
-			"-i"|"--include-from")
-				# File must exist and be readable
-				! test_file_perms "r" "${2}" && echo "$name: '${2}' does not exist or is not readable!" >&2 && exit 1
-				_FORCED_INCLUSION_PATTERN_FILE=$2
-				_SKIP_HOME_DIRS=true
-				shift 2 ;;
-			"-l"|"--log-level")
-				LOG_LEVEL=$2;
-				shift 2 ;;
-			"--log-file")
-				# Test if file is writeable
-				! test_file_perms "w" "${2}" && echo "$name: '${2}' is not writeable!" >&2 && exit 1
-				_FORCED_LOG_FILE=$2
-				shift 2 ;;
-			"-f"|"--force-run")
-				_FORCE_RUN=true
-				shift ;;
-			"-q"|"--quiet")
-				_QUIET_MODE=true
-				shift ;;
-			"-v"|"--verbose")
-				! $_QUIET_MODE && _VERBOSE_MODE=true
-				shift ;;
-			"-p"|"--progress")
-				! $_QUIET_MODE && _SHOW_PROGRESS=true
-				shift ;;
-			"-h"|"--help")
-				print_help
-				exit ;;
-			*)
-				shift
-				break ;;
-		esac
-	done
+    while true; do
+        case "$1" in
+            "-r"|"--remote-host")
+                REMOTE_HOST=$2
+                shift 2 ;;
+            "--remote-user")
+                REMOTE_USER=$2
+                shift 2 ;;
+            "--push-module")
+                PUSH_MODULE=$2
+                shift 2 ;;
+            "--ssh-options")
+                SSH_OPTIONS="${SSH_OPTIONS} ${2}"
+                shift 2 ;;
+            "-o"|"--rsync-options")
+                RSYNC_OPTIONS="${RSYNC_OPTIONS} $2"
+                shift 2 ;;
+            "-n"|"--dry-run")
+                _DRY_RUN=true
+                shift ;;
+            "-s"|"--no-home-dirs")
+                _SKIP_HOME_DIRS=true
+                shift ;;
+            "-i"|"--include-from")
+                # File must exist and be readable
+                ! test_file_perms "r" "${2}" && echo "$name: '${2}' does not exist or is not readable!" >&2 && exit 1
+                _FORCED_INCLUSION_PATTERN_FILE=$2
+                _SKIP_HOME_DIRS=true
+                shift 2 ;;
+            "-l"|"--log-level")
+                LOG_LEVEL=$2;
+                shift 2 ;;
+            "--log-file")
+                # Test if file is writeable
+                ! test_file_perms "w" "${2}" && echo "$name: '${2}' is not writeable!" >&2 && exit 1
+                _FORCED_LOG_FILE=$2
+                shift 2 ;;
+            "-f"|"--force-run")
+                _FORCE_RUN=true
+                shift ;;
+            "-q"|"--quiet")
+                _QUIET_MODE=true
+                shift ;;
+            "-v"|"--verbose")
+                ! $_QUIET_MODE && _VERBOSE_MODE=true
+                shift ;;
+            "-p"|"--progress")
+                ! $_QUIET_MODE && _SHOW_PROGRESS=true
+                shift ;;
+            "-h"|"--help")
+                print_help
+                exit ;;
+            *)
+                shift
+                break ;;
+        esac
+    done
 }
 
 ###############################################################################
@@ -463,9 +463,9 @@ parse_cmd_args "$@"
 
 # Check if a backup is already running
 if [ -f /tmp/rs-backup.lock ] && ! $_FORCE_RUN; then
-	write_log 1 "Backup lock file exists. Either a backup is already running or it didn't shut down properly last time."
-	write_log 1 "If you're sure no backup is running right now, remove the lock file '/tmp/rs-backup.lock' or use the '--force-run' parameter."
-	exit 1
+    write_log 1 "Backup lock file exists. Either a backup is already running or it didn't shut down properly last time."
+    write_log 1 "If you're sure no backup is running right now, remove the lock file '/tmp/rs-backup.lock' or use the '--force-run' parameter."
+    exit 1
 fi
 
 write_log 4 "No other backup running, ready to start."
@@ -476,20 +476,20 @@ touch /tmp/rs-backup.lock
 
 # Check if script has been invoked as root
 if [ $(id -u) -eq 0 ]; then
-	write_log 4 "Running as root, performing global system backup..."
-	back_up_system
-	if ! $_SKIP_HOME_DIRS; then
-		back_up_home_dirs
-	else
-		write_log 3 "Skipping home directory backup as requested."
-	fi
+    write_log 4 "Running as root, performing global system backup..."
+    back_up_system
+    if ! $_SKIP_HOME_DIRS; then
+        back_up_home_dirs
+    else
+        write_log 3 "Skipping home directory backup as requested."
+    fi
 else
-	write_log 3 "Running without root privileges, only backing up user home directory..."
-	if [ "${HOME}" != "" ]; then
-		back_up_single_home_dir "$(realpath ${HOME})" "$(id -nu)"
-	else
-		write_log 2 "Current user has no home directory, skipping."
-	fi
+    write_log 3 "Running without root privileges, only backing up user home directory..."
+    if [ "${HOME}" != "" ]; then
+        back_up_single_home_dir "$(realpath ${HOME})" "$(id -nu)"
+    else
+        write_log 2 "Current user has no home directory, skipping."
+    fi
 fi
 
 write_log 4 "Removing lock file..."
@@ -498,5 +498,5 @@ rm /tmp/rs-backup.lock
 write_log 4 "Done."
 
 if [ $_ERROR_COUNT -gt 0 ]; then
-	exit 1
+    exit 1
 fi
