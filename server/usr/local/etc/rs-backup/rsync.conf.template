@@ -1,6 +1,5 @@
 [push]
 uid = ${USERNAME}
-gid = ${GROUPNAME}
 path = ${HOME_DIR}/${FILES_DIR}/.sync
 use chroot = 0
 read only = 0
@@ -13,7 +12,6 @@ post-xfer exec = /usr/local/bin/rs-rotate "${HOME_DIR}/rsnapshot.conf"
 
 [pull]
 uid = ${USERNAME}
-gid = ${GROUPNAME}
 path = ${HOME_DIR}/${FILES_DIR}
 use chroot = 0
 read only = 1

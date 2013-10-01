@@ -47,9 +47,6 @@ chmod 0644 "${HOME_DIR}/rsync.conf"
 chown root:root "${HOME_DIR}/rsnapshot.conf"
 chmod 0644 "${HOME_DIR}/rsnapshot.conf"
 
-# Create backup directory
-mkdir -p "${HOME_DIR}/${FILES_DIR}/.sync"
-
 # Set permissions for backup directory
 chown -R "${USERNAME}:${GROUPNAME}" "${HOME_DIR}/${FILES_DIR}"
 chmod -R 0755 "${HOME_DIR}/${FILES_DIR}"
