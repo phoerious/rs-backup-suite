@@ -5,7 +5,7 @@ rs-backup-suite is a set of shell scripts for setting up a custom NAS on a compu
 ## How it works
 rs-backup-suite is designed for push backups, which means the client pushes its files to the server. This is ideal for computers which are not always on such as most desktop PCs.
 
-It is also a user-centric backup system. That means each user creates his own backup on the NAS instead of root backing up the whole machine at once (although this is possible). That also means that each user has a UNIX account on the NAS. The NAS username is usually <hostname>-<local user name> (e.g. mymachine-johndoe).
+It is also a user-centric backup system. That means each user creates his own backup on the NAS instead of root backing up the whole machine at once (although this is possible). That also means that each user has a UNIX account on the NAS. The NAS username is usually `<hostname>-<local user name>` (e.g. `mymachine-johndoe`).
 
 On the client machine(s) each user can create a file called `.rs-backup-include` (name is configurable) inside his home directory which includes the list of files that should be considered by the backup. Additionally root can maintain a similar file located at `/usr/local/etc/rs-backup/include-files` for the system files.
 
