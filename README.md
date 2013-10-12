@@ -41,7 +41,11 @@ The optional third parameter specifies the path to the SSH public key file which
 **TIP:** If you don't remember the parameters for all these commands, simply run them without any and you'll get simple usage instructions.
 
 #### Making the chroot work
-rs-backup-suite can chroot backup users into the backup home base directory. For this to work you need to add the following to your `/etc/fstab` and run `mount -a` afterwards:
+rs-backup-suite can chroot backup users into the backup home base directory. For this to work you need to add a few folders to your `/bkp` directory:
+    
+    mkdir -p "/bkp/"{"bin","lib","usr/bin","usr/lib","usr/local/bin","/usr/share/perl5","dev"}
+    
+Then also add the following to your `/etc/fstab` and run `mount -a` afterwards:
 
     # Chroot
     /bin                    /bkp/bin                none    bind             0       0
@@ -52,7 +56,7 @@ rs-backup-suite can chroot backup users into the backup home base directory. For
     /usr/share/perl5        /bkp/usr/share/perl5    none    bind             0       0
     /dev                    /bkp/dev                none    bind             0       0
 
-**NOTE:** In Ubuntu the perl modules are located at `/usr/share/perl`.
+**NOTE:** In Ubuntu the Perl modules are located at `/usr/share/perl` instead of `/usr/share/perl5`. Change that accordingly when adding the directories to `/bkp` and creating the mount points.
 
 On a 64-bit system you may need to add this to your `/etc/fstab`:
 
