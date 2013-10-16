@@ -8,7 +8,7 @@ log file = ${HOME_DIR}/rsync.log
 fake super = 1
 max connections = 1
 lock file = ${HOME_DIR}/rsyncd.lock
-post-xfer exec = /usr/local/bin/rs-rotate "${HOME_DIR}/rsnapshot.conf"
+post-xfer exec = touch "${HOME_DIR}/${FILES_DIR}/.sync" && /usr/local/bin/rs-rotate "${HOME_DIR}/rsnapshot.conf"
 
 [pull]
 uid = ${USERNAME}
