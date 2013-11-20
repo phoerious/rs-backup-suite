@@ -19,7 +19,7 @@ remote_username="$2"
 ssh_key_file="$3"
 local_username="${remote_hostname}-${remote_username}"
 
-useradd -G backup -b "${BACKUP_ROOT}" -m -k /etc/rs-skel -p '*' -s /bin/sh "${local_username}"
+useradd -G backup -b "${BACKUP_ROOT}" -m -k /etc/rs-skel -p '*' -s /bin/bash "${local_username}"
 rs-update-passwd
 
 # Generate config files from templates
