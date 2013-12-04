@@ -65,7 +65,7 @@ Options:
                           machine and %u with your username)
      --push-module=NAME   The remote rsync server module
      --ssh-options=OPTS   Additional SSH options (will be merged with the default
-                          ptions set in the rs-backup client-config file)
+                          options set in the rs-backup client-config file)
  -o, --rsync-options=OPTS Additional options for rsync
  -n, --dry-run            Perform a test run (same as the --dry-run option for
                           rsync). Enable --verbose mode for useful control output
