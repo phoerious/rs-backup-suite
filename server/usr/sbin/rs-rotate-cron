@@ -6,7 +6,7 @@ if [ "$1" == "" ]; then
 	exit
 fi
 
-. /usr/local/etc/rs-backup/server-config
+. /etc/rs-backup/server-config
 
 for home_dir in "${BACKUP_ROOT}"/*; do
 	if [ -d "${home_dir}/${FILES_DIR}" ] && [ -e "${home_dir}/rsnapshot.conf" ]; then

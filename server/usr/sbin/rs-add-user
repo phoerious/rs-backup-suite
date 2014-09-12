@@ -12,7 +12,7 @@ if [ "$1" == "" ] || [ "$2" == "" ]; then
 	exit
 fi
 
-. /usr/local/etc/rs-backup/server-config
+. /etc/rs-backup/server-config
 
 remote_hostname="$1"
 remote_username="$2"
@@ -27,8 +27,8 @@ USERNAME="${local_username}"
 GROUPNAME="${local_username}"
 HOME_DIR="${BACKUP_ROOT}/${local_username}"
 
-rsync_conf="$(cat /usr/local/etc/rs-backup/rsync.conf.template)"
-rsnapshot_conf="$(cat /usr/local/etc/rs-backup/rsnapshot.conf.template)"
+rsync_conf="$(cat /etc/rs-backup/rsync.conf.template)"
+rsnapshot_conf="$(cat /etc/rs-backup/rsnapshot.conf.template)"
 
 rsync_conf=$(eval "cat << EOF
 ${rsync_conf}

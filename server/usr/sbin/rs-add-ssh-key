@@ -12,14 +12,14 @@ if [ "$1" == "" ] || [ "$2" == "" ] || [ "$3" == "" ]; then
 	exit
 fi
 
-. /usr/local/etc/rs-backup/server-config
+. /etc/rs-backup/server-config
 
 home_dir="${BACKUP_ROOT}/${1}-${2}"
 
 mkdir -p "${home_dir}/.ssh"
 
 # Add public key to authorized_keys file and restrict shell commands
-echo -n "command=\"/usr/local/bin/rs-run-ssh-cmd '${home_dir}'\" " >> "${home_dir}/.ssh/authorized_keys"
+echo -n "command=\"/usr/bin/rs-run-ssh-cmd '${home_dir}'\" " >> "${home_dir}/.ssh/authorized_keys"
 cat "$3" >> "${home_dir}/.ssh/authorized_keys"
 
 # Protect SSH config by assigning ownership to root

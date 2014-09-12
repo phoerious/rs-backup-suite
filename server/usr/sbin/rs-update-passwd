@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. /usr/local/etc/rs-backup/server-config
+. /etc/rs-backup/server-config
 
 # Take precautions :-)
 if [ "${BACKUP_ROOT}" == "" ] || [ "$(realpath ${BACKUP_ROOT})" == "/" ]; then

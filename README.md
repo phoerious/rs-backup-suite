@@ -52,7 +52,6 @@ rs-backup-suite can chroot backup users into the backup home base directory. For
     /lib                    /bkp/lib                none    bind             0       0
     /usr/bin                /bkp/usr/bin            none    bind             0       0
     /usr/lib                /bkp/usr/lib            none    bind             0       0
-    /usr/local/bin          /bkp/usr/local/bin      none    bind             0       0
     /usr/share/perl5        /bkp/usr/share/perl5    none    bind             0       0
     /dev                    /bkp/dev                none    bind             0       0
 

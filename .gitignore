@@ -6,6 +6,6 @@ desktop.ini
 Desktop.ini
 .DS_Store
 
-server/usr/local/etc/rs-backup/server-config
-client/usr/local/etc/rs-backup/client-config
-client/usr/local/etc/rs-backup/include-files
+server/etc/rs-backup/server-config
+client/etc/rs-backup/client-config
+client/etc/rs-backup/include-files

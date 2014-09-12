@@ -1,2 +1,2 @@
 #!/bin/sh
-/usr/local/sbin/rs-rotate-cron daily
+/usr/sbin/rs-rotate-cron daily

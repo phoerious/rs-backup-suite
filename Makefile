@@ -23,7 +23,7 @@ server-install: $(wildcard server/bkp/etc/*) $(wildcard server/etc/*/*) $(wildca
 	mkdir -p /etc/rs-skel
 	mkdir -p /etc/rs-backup
 	mkdir -p /bkp/{bin,dev,etc,lib,usr}
-	mkdir -p /bkp/usr/{bin,lib,local,share}
+	mkdir -p /bkp/usr/{bin,lib,share}
 	
 ifeq ($(OS),Ubuntu)
 	mkdir -p /bkp/usr/share/perl
