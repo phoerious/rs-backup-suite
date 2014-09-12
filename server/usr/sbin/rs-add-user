@@ -1,13 +1,14 @@
 #!/bin/sh
 ##
 # rs-add-user
-# Copyright (C) 2013 by Janek Bevendorff
+# Copyright (C) 2013-2014 by Janek Bevendorff
 # Website: http://www.refining-linux.org/
 # 
 # Set up a backup user
 ##
 
 if [ "$1" == "" ] || [ "$2" == "" ]; then
+	. rs-version
 	echo "Usage: $(basename $0) <remote host> <remote username> [<ssh public key file>]"
 	exit
 fi

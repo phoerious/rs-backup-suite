@@ -1,0 +1,13 @@
+#!/bin/sh
+##
+# rs-version
+# Copyright (C) 2013-2014 by Janek Bevendorff
+# Website: http://www.refining-linux.org/
+# 
+# Print out version and copyright information for rs-backup.
+##
+
+VERSION="0.2.0"
+
+echo -e "\e[1mrs-backup-suite\e[0m version ${VERSION}"
+echo "Copyright (C) 2013-2014 Janek Bevendorff"
