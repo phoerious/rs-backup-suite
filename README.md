@@ -132,3 +132,8 @@ Be aware that both access methods are strictly read-only! Write access is only g
 
 ## Side note
 Because rs-backup-suite uses rsync for the client-server communication you don't necessarily need both parts. As long as you have a working rsync server on your NAS you can use the client script to push files to it. On the other hand you can use the rs-backup-suite server part with any other rsync client, as well.
+
+## Warning to users of older versions
+`rs-backup` used to reside in `/usr/local` instead of `/usr`. With the addition of a proper Makefile in version 0.2.0 this has changed. The consequence is that older setups won't work with the new version without modifications. In order to update your setup you need to update the path to `rs-run-ssh-cmd` (now at `/usr/bin/rs-run-ssh-cmd`) inside your users' `~/.ssh/authorized_keys` files as well as the path to `rs-rotate` (`/usr/bin/rs-rotate`) inside their `rsync.conf` files. Alternatively just create symlinks to the old locations.
+
+Moving `rs-backup` to `/usr` also means that for chroot setups the `/bkp/usr/local` mountpoint is no longer needed.

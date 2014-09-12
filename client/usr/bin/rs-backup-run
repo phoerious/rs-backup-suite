@@ -1,7 +1,7 @@
 #!/bin/bash
 ##
 # rs-backup-run
-# Copyright (C) 2013 by Janek Bevendorff
+# Copyright (C) 2013-2014 by Janek Bevendorff
 # Website: http://www.refining-linux.org/
 # 
 # Script to push backups to a remote rsync backup server.
@@ -21,7 +21,7 @@
 # Additional internal config
 ###############################################################################
 
-_VERSION=0.1.1
+_VERSION=0.2.0
 _GLOBAL_INCLUSION_PATTERN_FILE="/etc/rs-backup/include-files"
 _FORCED_INCLUSION_PATTERN_FILE=""
 _SKIP_HOME_DIRS=false
@@ -44,7 +44,7 @@ _ERROR_COUNT=0
 print_help() {
     cat << HELP
 rs-backup-run  version ${_VERSION}
-Copyright (C) 2013 by Janek Bevendorff
+Copyright (C) 2013-2014 by Janek Bevendorff
 Web site: http://www.refining-linux.org/
 
 Push backup to rsync backup server over SSH.
