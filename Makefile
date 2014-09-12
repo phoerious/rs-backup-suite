@@ -21,6 +21,7 @@ install: server-install client-install
 
 server-install: $(wildcard server/bkp/etc/*) $(wildcard server/etc/*/*) $(wildcard server/usr/*/*)
 	mkdir -p /etc/rs-skel
+	mkdir -p /etc/rs-backup
 	mkdir -p /bkp/{bin,dev,etc,lib,usr}
 	mkdir -p /bkp/usr/{bin,lib,local,share}
 	
@@ -36,14 +37,16 @@ endif
 		cp -Rv --preserve=mode,timestamps $$i $(addprefix /,$${i/server\//}); \
 	done;
 
-client-install: $(wildcard client/etc/*) $(wildcard client/usr/bin/*)
+client-install: $(wildcard client/etc/*/*) $(wildcard client/usr/bin/*)
+	mkdir -p /etc/rs-backup
+
 	@for i in $+; do \
 		cp -Rv --preserve=mode,timestamps $$i $(addprefix /,$${i/client\//}); \
 	done;
 
 uninstall: server-uninstall client-uninstall
 
-server-uninstall:  $(wildcard server/etc/*/*) server/etc/rs-skel $(wildcard server/usr/*/*)
+server-uninstall:  $(wildcard server/etc/*/*) server/etc/rs-skel server/etc/rs-backup $(wildcard server/usr/*/*)
 	rm -Rf $(addprefix /,$(subst server/,,$+))
 	@echo -e "\e[1mINFO: /bkp not removed to preserve your data. Delete it manually if you don't need it anymore.\e[0m"
 
