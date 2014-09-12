@@ -34,14 +34,16 @@ endif
 	ln -snf /bkp /bkp/bkp
 	
 	@for i in $+; do \
-		cp -Rv --preserve=mode,timestamps $$i $(addprefix /,$${i/server\//}); \
+		cp -av $$i $${i/server/}; \
+		chown root:root $$i; \
 	done;
 
 client-install: $(wildcard client/etc/*/*) $(wildcard client/usr/bin/*)
 	mkdir -p /etc/rs-backup
 
 	@for i in $+; do \
-		cp -Rv --preserve=mode,timestamps $$i $(addprefix /,$${i/client\//}); \
+		cp -av $$i $${i/client/}; \
+		chown root:root $$i; \
 	done;
 
 uninstall: server-uninstall client-uninstall
