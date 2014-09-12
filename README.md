@@ -13,10 +13,14 @@ On the client machine(s) each user can create a file called `.rs-backup-include`
 rs-backup-suite is split into two parts: a client part for pushing the backup to the NAS and a server part which runs on the NAS itself.
 
 ### Server
-For the server part simply copy the contents of the `server` directory to your root directory and all the necessary files will be in place. Make sure that you copy the file permissions as well! Furthermore make sure that `/usr/local/bin` and `/usr/local/sbin` are in your `$PATH` environment variable as root. Finally rename the file `/usr/local/etc/server-config.example` to `/usr/local/etc/server-config`.
+For installing the server component run
+
+    sudo make server-install
+
+on your server machine. This installs all the necessary files into the right location on your system. Finally copy the file `/etc/rs-backup/server-config.example` to `/etc/rs-backup/server-config`.
 
 #### Tweaking the configuration file
-The configuration file is `/usr/local/etc/server-config`. There you can configure the following directives:
+If you need to tweak the server settings, simply edit `/etc/rs-backup/server-config` to your needs. There you can configure the following directives:
 
 * `BACKUP_ROOT`: The directory under which the home directories of the backup users are stored. The default is `/bkp`
 * `FILES_DIR`: The directory under which the actual backups are kept (relative to the backup user's home directory). The default is `files`.
@@ -41,11 +45,7 @@ The optional third parameter specifies the path to the SSH public key file which
 **TIP:** If you don't remember the parameters for all these commands, simply run them without any and you'll get simple usage instructions.
 
 #### Making the chroot work
-rs-backup-suite can chroot backup users into the backup home base directory. For this to work you need to add a few folders to your `/bkp` directory:
-    
-    mkdir -p "/bkp/"{"bin","lib","usr/bin","usr/lib","usr/local/bin","/usr/share/perl5","dev"}
-    
-Then also add the following to your `/etc/fstab` and run `mount -a` afterwards:
+rs-backup-suite can chroot backup users into the backup home base directory. For this to work you need to add a few lines to your `/etc/fstab` and run `mount -a` afterwards:
 
     # Chroot
     /bin                    /bkp/bin                none    bind             0       0
@@ -56,13 +56,15 @@ Then also add the following to your `/etc/fstab` and run `mount -a` afterwards:
     /usr/share/perl5        /bkp/usr/share/perl5    none    bind             0       0
     /dev                    /bkp/dev                none    bind             0       0
 
-**NOTE:** In Ubuntu the Perl modules are located at `/usr/share/perl` instead of `/usr/share/perl5`. Change that accordingly when adding the directories to `/bkp` and creating the mount points.
+**NOTE:** In Ubuntu the Perl modules are located at `/usr/share/perl` instead of `/usr/share/perl5`. Change that accordingly.
 
-On a 64-bit system you may need to add this to your `/etc/fstab`:
+If your 64-bit system doesn't have a `/lib` folder but only `/lib64` you may need to add this to your `/etc/fstab`:
 
     /lib64                  /bkp/lib64              none    bind             0       0
 
-Then add this to the end of your `/etc/ssh/sshd_config`:
+and rename `/bkp/lib` to `/bkp/lib64`. Usually `/lib` is symlinked to `/lib64` though.
+
+Finally add this to the end of your `/etc/ssh/sshd_config`:
     
     Match Group backup 
         ChrootDirectory /bkp/
@@ -77,24 +79,36 @@ To change how many increments of which level are kept, edit the file `/bkp/etc/r
 If you add or remove any backup levels, make sure you also update the cron scripts. By default three cron scripts are installed: `/etc/cron.daily/rs-backup-rotate`, `/etc/cron.weekly/rs-backup-rotate` and `/etc/cron.monthly/rs-backup-rotate`.
 
 ### Client
-To set up the client you simply need to copy the contents of the `client` directory to your root folder on the client machines (again make sure you copy the file permissions, too). Then rename the file `/usr/local/etc/rs-backup/client-config.example` to `/usr/local/etc/rs-backup/client-config`. Finally edit it as root and replace the value of `REMOTE_HOST` with the hostname or IP address of your NAS.
+To set up the client you simply need to run
 
-On the client machines the script `/usr/local/bin/rs-backup-run` is used for performing the backups. This script can either be run as root or as an unprivileged user. The behavior differs in both cases:
+    sudo make client-install
 
-* If run as root, all files and folder specified in `/usr/local/etc/rs-backup/include-files` will be backed up. The backup user used for logging into the NAS is `hostname-root` by default (where `hostname` is the hostname of the current machine). Additionally the home directories of all users will be scanned. If a home directory contains a file called `.rs-backup-include` all files and folders specified inside that file will be backed up under this user's privileges. The username used for logging into the NAS is `hostname-username` (where `hostname` is again substituted for the hostname of the current machine and `username` for the user whose home directory is being backed up).
+on your client machine. Then copy the file `/etc/rs-backup/client-config.example` to `/etc/rs-backup/client-config`, edit it as root and replace the value of `REMOTE_HOST` with the hostname or IP address of your NAS.
+
+On the client machines the script `/usr/bin/rs-backup-run` is used for performing the backups. This script can either be run as root or as an unprivileged user. The behavior differs in both cases:
+
+* If run as root, all files and folder specified in /etc/rs-backup/include-files` will be backed up. The backup user used for logging into the NAS is `hostname-root` by default (where `hostname` is the hostname of the current machine). Additionally the home directories of all users will be scanned. If a home directory contains a file called `.rs-backup-include` all files and folders specified inside that file will be backed up under this user's privileges. The username used for logging into the NAS is `hostname-username` (where `hostname` is again substituted for the hostname of the current machine and `username` for the user whose home directory is being backed up).
 * If run as a normal user, only the files that are specified in your own `.rs-backup-include` will be backed up.
 
 #### Changing the default configuration
-As you already know, all the client configuration options are defined in `/usr/local/etc/rs-backup/client-config`. You can edit the file as you wish. All parameters are documented clearly by comments. Most of these configuration options can also be overridden at runtime by passing command line arguments to `rs-backup-run`. For a list and a description of all possible command line arguments run
+All the client configuration options are defined in `/etc/rs-backup/client-config`. You can edit the file as you wish. All parameters are documented clearly by comments. Most of these configuration options can also be overridden at runtime by passing command line arguments to `rs-backup-run`. For a list and a description of all possible command line arguments run
 
     rs-backup-run --help
+
+## Installing client and server on the same machine
+You can of course also install server and client on the same machine. This may be useful if you want, e.g. save your data to an external USB drive instead of a real NAS. A shortcut for running both `sudo make server-install` and `sudo make client-install` is simply running
+
+    sudo make install
+
+## Uninstalling
+Similar to the `install` targets there are als `uninstall` and `server-uninstall` / `client-uninstall` targets. These remove all the scripts but preserve the data in `/bkp`.
 
 ## Backup strategies
 The intended use case for rs-backup-suite is as follows: you set up the server part on your NAS. Then you create a backup user for each user on each client machine.
 
-In the next step you edit the crontab for root on each client and add a job for running `/usr/local/bin/rs-backup-run` at certain times. You can of course also create a shell script that calls `rs-backup-run` and put it in `/etc/cron.daily` to perform a global backup once a day.
+In the next step you edit the crontab for root on each client and add a job for running `/usr/bin/rs-backup-run` at certain times. You can of course also create a shell script that calls `rs-backup-run` and put it in `/etc/cron.daily` to perform a global backup once a day.
 
-After everything is set up that way you create the file `/usr/local/etc/rs-backup/include-file` and write to it a list of files and folders you want to back up as root (e.g. you can specify `/etc/***` to backup the whole `/etc` directory and all its subdirectories). Furthermore each user creates a file called `.rs-backup-include` inside his home directory that serves the same purpose for his own home directory instead of the global system. Such a file could look like this:
+After everything is set up that way you create the file `/etc/rs-backup/include-file` and write to it a list of files and folders you want to back up as root (e.g. you can specify `/etc/***` to backup the whole `/etc` directory and all its subdirectories). Furthermore each user creates a file called `.rs-backup-include` inside his home directory that serves the same purpose for his own home directory instead of the global system. Such a file could look like this:
 
     - /home/johndoe/.cache/***
     /home
