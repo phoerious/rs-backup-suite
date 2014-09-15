@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# Check if lsb_release exists
+command -v lsb_release > /dev/null 2>&1
+
+if [ $? -eq 0 ]; then
+	lsb_release -is
+elif [ -e /etc/synoinfo.conf ]; then
+	echo "Synology"
+else
+	echo "unknown"
+	exit 1
+fi
