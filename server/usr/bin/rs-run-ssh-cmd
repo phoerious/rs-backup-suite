@@ -6,6 +6,7 @@ if [ "${SSH_ORIGINAL_COMMAND}" == "internal-sftp" ] || [ "${SSH_ORIGINAL_COMMAND
 	cd "${home_dir}/files"
 	exec /usr/lib/ssh/sftp-server -R
 else
+	source /etc/profile
 	exec `which rsync` --server --daemon --config="${home_dir}/rsync.conf" .
 fi
 
