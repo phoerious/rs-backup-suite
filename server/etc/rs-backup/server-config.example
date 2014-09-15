@@ -1,6 +1,9 @@
 # Base directory for all backups
 BACKUP_ROOT="/bkp"
 
+# Backup user group
+USER_GROUP="backup"
+
 # Directory containing the actual backup files (relative to BACKUP_ROOT/<user>)
 FILES_DIR="files"
 

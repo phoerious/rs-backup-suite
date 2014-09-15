@@ -20,14 +20,57 @@ remote_username="$2"
 ssh_key_file="$3"
 local_username="${remote_hostname}-${remote_username}"
 
-useradd -G backup -b "${BACKUP_ROOT}" -m -k /etc/rs-skel -p '*' -s /bin/bash "${local_username}"
-rs-update-passwd
-
-# Generate config files from templates
+# config template variables
 USERNAME="${local_username}"
 GROUPNAME="${local_username}"
 HOME_DIR="${BACKUP_ROOT}/${local_username}"
 
+# Detect distribution
+distribution=$(rs-detect-distribution)
+
+# Synology DSM
+if [[ "Synology" == ${distribution} ]]; then
+	GROUPNAME="users"
+	
+	# Create group if it does not exist
+	synogroup --get "${USER_GROUP}" > /dev/null 2>&1
+	if [ $? -ne 0 ]; then
+		synogroup --add "${USER_GROUP}" > /dev/null
+		synogroup --descset "${USER_GROUP}" "rs-backup group" > /dev/null
+	fi
+
+	# Create (disabled) user 
+	synouser --add "${USERNAME}" "" "" 1 "" 0
+	sed -i "s:^\(${USERNAME/./\\.}\)\:[^\:]*\::\1\:*\::" /etc/shadow
+
+	# Re-enable user, set description
+	synouser --modify "${USERNAME}" "rs-backup user" 0 ""
+
+	# Add user to group (Synology Y U so complicated?!)
+	members=$(synogroup --get "${USER_GROUP}" | grep -o "^[0-9]\+:\[.\+\]\$" | sed "s/[0-9]\+:\[\(.\+\)\]/\1/g")
+	synogroup --member "${USER_GROUP}" "${USERNAME}" ${members} > /dev/null
+
+	# Set correct home dir and shell
+	sed -i "s:^\(${USERNAME/./\\.}\:.\+\:\)[^\:]\+\:/sbin/nologin\$:\1${HOME_DIR//:/\:}\:/bin/ash:" /etc/passwd
+
+	# Create home dir
+	rmdir "/var/services/homes/${USERNAME}"
+	cp -R /etc/rs-skel "${HOME_DIR}"
+	chmod 0700 "${HOME_DIR}"
+	chown -R "${USERNAME}:${GROUPNAME}" "${HOME_DIR}"
+
+# "Normal" Linux systems
+else
+	# Create group if it does not exist
+	if ! grep -q "^${USER_GROUP}:" /etc/group; then
+		groupadd "${USER_GROUP}"
+	fi
+	useradd -G "${USER_GROUP}" -b "${BACKUP_ROOT}" -m -k /etc/rs-skel -p '*' -s /bin/bash -c "rs-backup user" "${local_username}"
+fi
+
+rs-update-passwd
+
+# Generate config files from templates
 rsync_conf="$(cat /etc/rs-backup/rsync.conf.template)"
 rsnapshot_conf="$(cat /etc/rs-backup/rsnapshot.conf.template)"
 
