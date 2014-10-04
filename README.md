@@ -100,7 +100,7 @@ You can of course also install server and client on the same machine. This may b
     sudo ./install all
 
 ## Uninstalling
-For uninstalling run `./uninstall.sh [all|server|client]`. These remove all the scripts but preserve the data in `/bkp` (or whatever your backup folder is).
+For uninstalling run `./uninstall.sh [all|server|client]`. This removes all the scripts but preserves the data in `/bkp` (or whatever your backup folder is).
 
 ## Backup strategies
 The intended use case for rs-backup-suite is as follows: you set up the server part on your NAS. Then you create a backup user for each user on each client machine.
