@@ -1,6 +1,8 @@
 #!/bin/sh
 ##
-# Copyright (C) 2014 Janek Bevendorff
+# Copyright (C) 2013-2014 Janek Bevendorff
+# Website: http://www.refining-linux.org/
+# 
 # Install script for installing server and client script files
 # 
 # The MIT License (MIT)
@@ -35,6 +37,10 @@ if [ $UID -ne 0 ]; then
 	exit 1
 fi
 
+
+###############################################################################
+# Global variables
+###############################################################################
 DISTRIBUTION="$(./server/usr/bin/rs-detect-distribution)"
 COMPONENT="$1"
 MODE="install"
@@ -42,12 +48,21 @@ if [[ "$(basename $0)" == "uninstall.sh" ]]; then
 	MODE="uninstall"
 fi
 
+
+###############################################################################
 # Command aliases
+###############################################################################
 CP="cp -vr --preserve=mode,timestamps,links,xattr"
 RM="rm -Rvf"
 MKDIR="mkdir -pv"
 
+
+###############################################################################
+# Install mode
+###############################################################################
 if [[ $MODE == "install" ]]; then
+
+	# Server component
 	if [[ $COMPONENT == "all" ]] || [[ $COMPONENT == "server" ]]; then
 		echo "Installing Server component..."
 
@@ -147,6 +162,7 @@ if [[ $MODE == "install" ]]; then
 
 		echo "Done."
 	
+	# Client component
 	elif [[ $COMPONENT == "all" ]] || [[ $COMPONENT == "client" ]]; then
 		echo "Installing client component..."
 
@@ -159,6 +175,10 @@ if [[ $MODE == "install" ]]; then
 
 		echo "Done."
 	fi
+
+###############################################################################
+# Uninstall mode
+###############################################################################
 elif [[ "$MODE" == "uninstall" ]]; then
 	echo "This will uninstall rs-backup suite from this computer."
 	echo "Selected components for removal: $COMPONENT"
@@ -172,6 +192,7 @@ elif [[ "$MODE" == "uninstall" ]]; then
 		exit
 	fi
 
+	# Server component
 	if [[ $COMPONENT == "all" ]] || [[ $COMPONENT == "server" ]]; then
 		echo "Uninstalling server component..."
 
@@ -184,7 +205,8 @@ elif [[ "$MODE" == "uninstall" ]]; then
 		done
 
 		echo "Done."
-
+		
+	# Client component
 	elif [[ $COMPONENT == "all" ]] || [[ $COMPONENT == "client" ]]; then
 		echo "Uninstalling client component..."
 
@@ -206,8 +228,4 @@ elif [[ "$MODE" == "uninstall" ]]; then
 	echo
 	echo "INFO: Your backup folder was not removed to preserve your data."
 	echo "      If you don't need it anymore, just delete it."
-else
-	# Program should never end here
-	echo "Nothing to do." >&2
-	exit 1
 fi
