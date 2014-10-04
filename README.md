@@ -95,7 +95,7 @@ All the client configuration options are defined in `/etc/rs-backup/client-confi
     rs-backup-run --help
 
 ## Installing client and server on the same machine
-You can of course also install server and client on the same machine. This may be useful if you want, e.g. save your data to an external USB drive instead of a real NAS. A shortcut for running both `sudo make server-install` and `sudo make client-install` is simply running
+You can of course also install server and client on the same machine. This may be useful if you want, e.g. save your data to an external USB drive instead of a real NAS. A shortcut for running both `sudo ./install server` and `sudo ./install client` is simply running
 
     sudo ./install all
 
