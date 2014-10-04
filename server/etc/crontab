@@ -1,0 +1,3 @@
+@daily    /usr/sbin/rs-rotate-cron daily
+@weekly   /usr/sbin/rs-rotate-cron weekly
+@monthly  /usr/sbin/rs-rotate-cron monthly

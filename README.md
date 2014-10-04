@@ -15,9 +15,9 @@ rs-backup-suite is split into two parts: a client part for pushing the backup to
 ### Server
 For installing the server component run
 
-    sudo make server-install
+    sudo ./install.sh server
 
-on your server machine. This installs all the necessary files into the right location on your system. Finally copy the file `/etc/rs-backup/server-config.example` to `/etc/rs-backup/server-config`.
+on your server machine. This installs all the necessary files into the right location on your system.
 
 #### Tweaking the configuration file
 If you need to tweak the server settings, simply edit `/etc/rs-backup/server-config` to your needs. There you can configure the following directives:
@@ -45,7 +45,7 @@ The optional third parameter specifies the path to the SSH public key file which
 **TIP:** If you don't remember the parameters for all these commands, simply run them without any and you'll get simple usage instructions.
 
 #### Making the chroot work
-rs-backup-suite can chroot backup users into the backup home base directory. For this to work you need to add a few lines to your `/etc/fstab` and run `mount -a` afterwards:
+rs-backup-suite can chroot backup users into the backup home base directory. For this to work you need to add a few lines to your `/etc/fstab` and run `mount -a` afterwards (replace `/bkp` with your backup path):
 
     # Chroot
     /bin                    /bkp/bin                none    bind             0       0
@@ -55,7 +55,7 @@ rs-backup-suite can chroot backup users into the backup home base directory. For
     /usr/share/perl5        /bkp/usr/share/perl5    none    bind             0       0
     /dev                    /bkp/dev                none    bind             0       0
 
-**NOTE:** In Ubuntu the Perl modules are located at `/usr/share/perl` instead of `/usr/share/perl5`. Change that accordingly.
+**NOTE:** In Ubuntu the Perl modules are located at `/usr/share/perl` instead of `/usr/share/perl5`. Change that accordingly. Also note that if you are using Synology DSM, you also need to add a bind mount for /opt/bin to /bkp/opt/bin.
 
 If your 64-bit system doesn't have a `/lib` folder but only `/lib64` you may need to add this to your `/etc/fstab`:
 
@@ -80,7 +80,7 @@ If you add or remove any backup levels, make sure you also update the cron scrip
 ### Client
 To set up the client you simply need to run
 
-    sudo make client-install
+    sudo ./install.sh client
 
 on your client machine. Then copy the file `/etc/rs-backup/client-config.example` to `/etc/rs-backup/client-config`, edit it as root and replace the value of `REMOTE_HOST` with the hostname or IP address of your NAS.
 
@@ -97,10 +97,10 @@ All the client configuration options are defined in `/etc/rs-backup/client-confi
 ## Installing client and server on the same machine
 You can of course also install server and client on the same machine. This may be useful if you want, e.g. save your data to an external USB drive instead of a real NAS. A shortcut for running both `sudo make server-install` and `sudo make client-install` is simply running
 
-    sudo make install
+    sudo ./install all
 
 ## Uninstalling
-Similar to the `install` targets there are als `uninstall` and `server-uninstall` / `client-uninstall` targets. These remove all the scripts but preserve the data in `/bkp`.
+For uninstalling run ./uninstall.sh [all|server|client]. These remove all the scripts but preserve the data in `/bkp` (or whatever your backup folder is).
 
 ## Backup strategies
 The intended use case for rs-backup-suite is as follows: you set up the server part on your NAS. Then you create a backup user for each user on each client machine.
