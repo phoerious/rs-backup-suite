@@ -86,7 +86,7 @@ on your client machine. Then copy the file `/etc/rs-backup/client-config.example
 
 On the client machines the script `/usr/bin/rs-backup-run` is used for performing the backups. This script can either be run as root or as an unprivileged user. The behavior differs in both cases:
 
-* If run as root, all files and folder specified in /etc/rs-backup/include-files` will be backed up. The backup user used for logging into the NAS is `hostname-root` by default (where `hostname` is the hostname of the current machine). Additionally the home directories of all users will be scanned. If a home directory contains a file called `.rs-backup-include` all files and folders specified inside that file will be backed up under this user's privileges. The username used for logging into the NAS is `hostname-username` (where `hostname` is again substituted for the hostname of the current machine and `username` for the user whose home directory is being backed up).
+* If run as root, all files and folder specified in `/etc/rs-backup/include-files` will be backed up. The backup user used for logging into the NAS is `hostname-root` by default (where `hostname` is the hostname of the current machine). Additionally the home directories of all users will be scanned. If a home directory contains a file called `.rs-backup-include` all files and folders specified inside that file will be backed up under this user's privileges. The username used for logging into the NAS is `hostname-username` (where `hostname` is again substituted for the hostname of the current machine and `username` for the user whose home directory is being backed up).
 * If run as a normal user, only the files that are specified in your own `.rs-backup-include` will be backed up.
 
 #### Changing the default configuration
@@ -100,7 +100,11 @@ You can of course also install server and client on the same machine. This may b
     sudo ./install all
 
 ## Uninstalling
-For uninstalling run `./uninstall.sh [all|server|client]`. This removes all the scripts but preserves the data in `/bkp` (or whatever your backup folder is).
+For uninstalling run
+
+    ./uninstall.sh [all|server|client]
+
+This removes all the scripts but preserves the data in `/bkp` (or whatever your backup folder is).
 
 ## Backup strategies
 The intended use case for rs-backup-suite is as follows: you set up the server part on your NAS. Then you create a backup user for each user on each client machine.
