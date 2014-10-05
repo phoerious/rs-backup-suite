@@ -98,7 +98,11 @@ if [[ $MODE == "install" ]]; then
 		fi
 
 		echo "Installing backup directory..."
-		BKP_DIR="$(grep -o '^BACKUP_ROOT=".*"$' /etc/rs-backup/server-config | sed 's#BACKUP_ROOT=\"\(.*\)\"$#\1#')"
+		if [ -e /etc/rs-backup/server-config ]; then
+			BKP_DIR="$(grep -o '^BACKUP_ROOT=".*"$' /etc/rs-backup/server-config | sed 's#BACKUP_ROOT=\"\(.*\)\"$#\1#')"
+		else
+			BKP_DIR="/bkp"
+		fi
 		if [[ "$DISTRIBUTION" == "Synology" ]] && [[ "$BKP_DIR" == "/bkp" ]]; then
 			if readlink -q /var/services/homes > /dev/null; then
 				BKP_DIR="/var/services/homes"
@@ -107,6 +111,7 @@ if [[ $MODE == "install" ]]; then
 				BKP_DIR="/volume1/homes"
 			fi
 		fi
+
 		echo "Backup directory path will be '$BKP_DIR'."
 		echo -n "Do you want to use this directory? [Y/n] "
 		read answer
