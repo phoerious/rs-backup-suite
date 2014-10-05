@@ -1,0 +1,18 @@
+# Base directory for all backups
+BACKUP_ROOT="/bkp"
+
+# Backup user group
+USER_GROUP="backup"
+
+# Directory containing the actual backup files (relative to BACKUP_ROOT/<user>)
+FILES_DIR="files"
+
+# Set quota for individual backup users
+SET_QUOTA=false
+
+# Quota limits (use 0 for no limit)
+# Numbers may also end with k, M, G or T for magnitudes of 1024
+QUOTA_SOFT_LIMIT="350G"
+QUOTA_HARD_LIMIT="355G"
+QUOTA_INODE_SOFT_LIMIT="3900k"
+QUOTA_INODE_HARD_LIMIT="4000k"
