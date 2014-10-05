@@ -93,6 +93,7 @@ if [[ $MODE == "install" ]]; then
 			echo "ERROR: Could not install cron scripts, please add rotation jobs manually." >&2
 		fi
 
+		echo
 		echo "Installing backup directory..."
 		if [ -e /etc/rs-backup/server-config ]; then
 			BKP_DIR="$(grep -o '^BACKUP_ROOT=".*"$' /etc/rs-backup/server-config | sed 's#BACKUP_ROOT=\"\(.*\)\"$#\1#')"
