@@ -139,10 +139,13 @@ if [[ $MODE == "install" ]]; then
 			$MKDIR "$BKP_DIR"/usr/share/perl5
 		fi
 
-		$CP ./server/bkp/etc/* "$BKP_DIR"/etc/
-		# Correct command paths in rsnapshot config for Synology DSM
-		if [[ "$DISTRIBUTION" == "Synology" ]]; then
-			sed -i "s#/usr/bin/\(cp\|rm\|rsync\|logger\)\$#/opt/bin/\1#" "$BKP_DIR"/etc/rsnapshot.global.conf
+		# Do not overwrite existing config
+		if [ ! -e "$BKP_DIR"/etc/rsnapshot.global.conf ]; then
+			$CP ./server/bkp/etc/* "$BKP_DIR"/etc/
+			# Correct command paths in rsnapshot config for Synology DSM
+			if [[ "$DISTRIBUTION" == "Synology" ]]; then
+				sed -i "s#/usr/bin/\(cp\|rm\|rsync\|logger\)\$#/opt/bin/\1#" "$BKP_DIR"/etc/rsnapshot.global.conf
+			fi
 		fi
 
 		# Create symlink for chroot
