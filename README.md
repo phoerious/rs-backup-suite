@@ -45,25 +45,25 @@ The optional third parameter specifies the path to the SSH public key file which
 **TIP:** If you don't remember the parameters for all these commands, simply run them without any and you'll get simple usage instructions.
 
 #### Making the chroot work
-rs-backup-suite can chroot backup users into the backup home base directory. For this to work you need to add a few lines to your `/etc/fstab` and run `mount -a` afterwards (replace `/bkp` with your backup path):
+rs-backup-suite can chroot backup users into the backup home base directory. For this to work you need to create a few bind mounts. The install script already created the respective lines in your `/etc/fstab` for you. If you don't need any special configuration on your system, all you need to do is to uncomment everything between the `BEGIN` and `END` lines (do NOT change these two lines, though):
 
-    # Chroot
-    /bin                    /bkp/bin                none    bind             0       0
-    /lib                    /bkp/lib                none    bind             0       0
-    /usr/bin                /bkp/usr/bin            none    bind             0       0
-    /usr/lib                /bkp/usr/lib            none    bind             0       0
-    /usr/share/perl5        /bkp/usr/share/perl5    none    bind             0       0
-    /dev                    /bkp/dev                none    bind             0       0
+    # BEGIN: rs-backup-suite
+    #/lib                    /bkp/lib                 none    bind             0       0
+    #/dev                    /bkp/dev                 none    bind             0       0
+    #/usr/bin                /bkp/usr/bin             none    bind             0       0
+    #/usr/lib                /bkp/usr/lib             none    bind             0       0
+    #/usr/share/perl5        /bkp/usr/share/perl5     none    bind             0       0
+    # END: rs-backup-suite
 
-**NOTE:** In Ubuntu the Perl modules are located at `/usr/share/perl` instead of `/usr/share/perl5`. Change that accordingly. Also note that if you are using Synology DSM, you also need to add a bind mount for /opt/bin to /bkp/opt/bin.
+The necessary mounts may differ from system to system. For instance, Ubuntu needs `/usr/share/perl` instead of `/usr/share/perl5`. Synology DSM doesn't need `/usr/share/*` at all, but requires `/opt/bin`, `/opt/lib` and `/opt/libexec`. But in most cases you don't need to worry about that since the install script tries to make the correct decisions for you.
 
-If your 64-bit system doesn't have a `/lib` folder but only `/lib64` you may need to add this to your `/etc/fstab`:
+**NOTE:** If your 64-bit system doesn't have a `/lib` folder but only `/lib64` you may need to change the `/lib` line in your `/etc/fstab` as follows:
 
-    /lib64                  /bkp/lib64              none    bind             0       0
+    /lib64                  /bkp/lib64               none    bind             0       0
 
-and rename `/bkp/lib` to `/bkp/lib64`. Usually `/lib` is symlinked to `/lib64` though.
+Don't forget to rename `/bkp/lib` to `/bkp/lib64`.:w
 
-Finally add this to the end of your `/etc/ssh/sshd_config`:
+When you're done, add this to the end of your `/etc/ssh/sshd_config`:
     
     Match Group backup 
         ChrootDirectory /bkp/

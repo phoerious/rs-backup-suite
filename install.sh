@@ -140,6 +140,19 @@ if [[ $MODE == "install" ]]; then
 			$MKDIR "$BKP_DIR"/usr/share/perl5
 		fi
 
+		# Append fstab entries
+		if ! grep -q "^# BEGIN: rs-backup-suite" /etc/fstab; then
+			if [[ "$DISTRIBUTION" == "Ubuntu" ]]; then
+				fstab_name="fstab_ubuntu"
+			elif [[ "$DISTRIBUTION" == "Synology" ]]; then
+				fstab_name="fstab_synology"
+			else
+				fstab_name="fstab"
+			fi
+			fstab_contents="$(cat ./server/etc/$fstab_name | sed "s#::BACKUP_ROOT::#$BKP_DIR#")"
+			echo "$fstab_contents" >> /etc/fstab
+		fi
+
 		# Do not overwrite existing config
 		if [ ! -e "$BKP_DIR"/etc/rsnapshot.global.conf ]; then
 			$CP ./server/bkp/etc/* "$BKP_DIR"/etc/
@@ -222,6 +235,9 @@ elif [[ "$MODE" == "uninstall" ]]; then
 			echo "Removing crontab entries..."
 			sed -i '/^@[a-z]\+ \+\/usr\/sbin\/rs-rotate-cron [a-z]\+$/d' /etc/crontab
 		fi
+
+		# Remove fstab entries
+		sed -i '/^# BEGIN: rs-backup-suite$/,/^# END: rs-backup-suite$/d' /etc/fstab
 
 		echo "Done."
 		

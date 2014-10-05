@@ -1,0 +1,8 @@
+# BEGIN: rs-backup-suite
+#/lib                    ::BACKUP_ROOT::/lib                 none    bind             0       0
+#/dev                    ::BACKUP_ROOT::/dev                 none    bind             0       0
+#/usr/bin                ::BACKUP_ROOT::/usr/bin             none    bind             0       0
+#/opt/bin                ::BACKUP_ROOT::/opt/bin             none    bind             0       0
+#/opt/lib                ::BACKUP_ROOT::/opt/lib             none    bind             0       0
+#/opt/libexec            ::BACKUP_ROOT::/opt/libexec         none    bind             0       0
+# END: rs-backup-suite
