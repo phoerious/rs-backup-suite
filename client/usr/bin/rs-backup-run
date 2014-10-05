@@ -249,7 +249,7 @@ perform_backup() {
     local msg
     local backup_cmd
     local ssh_cmd
-    local rsync_opts="${RSNC_OPTIONS}"
+    local rsync_opts="${RSYNC_OPTIONS}"
     local exit_code
     local tee_device="/dev/tty"
 

@@ -25,6 +25,7 @@ REMOTE_USER="%h-%u"
 
 # Additional options for rsync
 RSYNC_OPTIONS="--acls --hard-links --xattrs"
+#RSYNC_OPTIONS="--hard-links --xattrs"
 
 # Global log file to use when running as root
 LOG_FILE="/var/log/rs-backup.log"
