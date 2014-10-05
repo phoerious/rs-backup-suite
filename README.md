@@ -61,7 +61,7 @@ The necessary mounts may differ from system to system. For instance, Ubuntu need
 
     /lib64                  /bkp/lib64               none    bind             0       0
 
-Don't forget to rename `/bkp/lib` to `/bkp/lib64`.:w
+Don't forget to rename `/bkp/lib` to `/bkp/lib64`.
 
 When you're done, add this to the end of your `/etc/ssh/sshd_config`:
     
