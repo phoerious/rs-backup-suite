@@ -204,6 +204,8 @@ elif [[ "$MODE" == "uninstall" ]]; then
 			$RM /usr/sbin/"$(basename $i)"
 		done
 
+		$RM /etc/rs-skel
+
 		[ -e /etc/cron.daily/rs-backup-rotate ]   && $RM /etc/cron.daily/rs-backup-rotate
 		[ -e /etc/cron.weekly/rs-backup-rotate ]  && $RM /etc/cron.weekly/rs-backup-rotate
 		[ -e /etc/cron.monthly/rs-backup-rotate ] && $RM /etc/cron.monthly/rs-backup-rotate
