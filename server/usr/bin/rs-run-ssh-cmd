@@ -27,17 +27,17 @@
 ##
 
 home_dir=$1
-OS="$(/usr/bin/rs-detect-distribution)"
 
-if [[ "Synology" == "$OS" ]]; then
-	export PATH="/opt/bin:/opt/sbin/:$PATH"
-fi
-
-if [ "${SSH_ORIGINAL_COMMAND}" == "internal-sftp" ] || [ "${SSH_ORIGINAL_COMMAND}" == "/usr/lib/ssh/sftp-server" ]; then
-	cd "${home_dir}/files"
-	exec /usr/lib/ssh/sftp-server -R
+if $(echo "${SSH_ORIGINAL_COMMAND}" | grep -q "^\(internal-sftp\|/usr/lib/ssh/sftp-server\)"); then
+	export HOME="${home_dir}/files"
+	cd $HOME
+	[ -x /usr/lib/ssh/sftp-server ] && exec /usr/lib/ssh/sftp-server -R
+	[ -x /usr/libexec/sftp-server ] && exec /usr/libexec/sftp-server -R
+	[ -x /opt/libexec/sftp-server ] && exec /opt/libexec/sftp-server -R
 else
-	exec `which rsync` --server --daemon --config="${home_dir}/rsync.conf" .
+	RSYNC=/usr/bin/rsync
+	[ ! -x $RSYNC ] && [ -x /opt/bin/rsync ] && RSYNC=/opt/bin/rsync
+	exec $RSYNC --server --daemon --config="${home_dir}/rsync.conf"
 fi
 
 echo "Session failed." >&2
