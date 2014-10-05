@@ -160,6 +160,55 @@ write_log() {
     fi
 }
 
+# Show a desktop notification using notify-send
+#
+# Usage: desktop_notify <type: INFO|WARNING|ERROR> <title> <message>
+#
+desktop_notify() {
+    local icon
+    local urgency
+    local user
+
+    command -v notify-send > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        # notify-send not available
+        return
+    fi
+
+    if $_QUIET_MODE || $_DRY_RUN; then
+        return
+    fi
+
+    user=$(who | awk '/:0/ { print $1; exit; }')
+    if [ $(id -u) -ne 0 ] && [ $(id -u "$user") -ne $(id -u) ]; then
+        # we're neither root nor the current user on display :0.0,
+        # so don't show any notification
+        return
+    fi
+
+    case $1 in
+        "ERROR")
+            icon="dialog-error.png"
+            urgency="critical"
+            ;;
+        "WARNING")
+            icon="dialog-warning.png"
+            urgency="normal"
+            ;;
+        "SUCCESS")
+            icon="task-complete.png"
+            urgency="low"
+            ;;
+        *)
+            icon="dialog-information.png"
+            urgency="low"
+            ;;
+    esac
+
+    if [[ "$user" != "" ]]; then
+        sudo -u "$user" DISPLAY=":0.0" notify-send -i "$icon" -u "$urgency" "rs-backup: $2" "$3"
+    fi
+}
 
 # Test if a file is readable and/or writeable
 # 
@@ -314,6 +363,7 @@ perform_backup() {
 
     if [ ${exit_code} -ne 0 ]; then
         write_log 1 "Backup failed! Error message: ${msg}"
+        desktop_notify "ERROR" "Backup failed!" "Backup for user '${username}' failed!<br>Please refer to your log files for further information."
         return ${exit_code}
     else
         write_log 3 "Backup finished."
@@ -339,6 +389,7 @@ back_up_system() {
         write_log 3 "Starting global system backup..."
     fi
     perform_backup "${_GLOBAL_INCLUSION_PATTERN_FILE}" "$(get_remote_username root)@${REMOTE_HOST}::${PUSH_MODULE}"
+    return $?
 }
 
 # Back up single home directory
@@ -370,6 +421,7 @@ back_up_single_home_dir() {
         write_log 3 "Starting backup of '${home_dir}'..."
     fi
     perform_backup "${home_dir}/${INCLUSION_PATTERN_FILE}" "$(get_remote_username ${username})@${REMOTE_HOST}::${PUSH_MODULE}" "${username}"
+    return $?
 }
 
 # Back up all home dirs
@@ -377,11 +429,15 @@ back_up_single_home_dir() {
 # Usage: back_up_home_dirs
 # 
 back_up_home_dirs() {
+    local exit_code=0
     write_log 3 "Starting backup of all home directories..."
 
     get_processed_passwd_file | while read line; do
         back_up_single_home_dir "$(echo -n ${line} | cut -d ':' -f 6)" "$(echo -n ${line} | cut -d ':' -f 1)"
+        exit_code=$(($exit_code | $?))
     done
+
+    return $exit_code
 }
 
 # Prase command line args
@@ -492,22 +548,35 @@ write_log 4 "No other backup running, ready to start."
 write_log 4 "Creating lock file..."
 touch /tmp/rs-backup.lock
 
+# Backup exit code (0 if all backups have finished successfully)
+_exit_code=$?
+
 # Check if script has been invoked as root
 if [ $(id -u) -eq 0 ]; then
     write_log 4 "Running as root, performing global system backup..."
+    desktop_notify "INFO" "Full system backup" "rs-backup is starting a full system backup..."
     back_up_system
+    _exit_code=$(($_exit_code | $?))
+
     if ! $_SKIP_HOME_DIRS; then
         back_up_home_dirs
+        _exit_code=$(($_exit_code | $?))
     else
         write_log 3 "Skipping home directory backup as requested."
     fi
 else
     write_log 3 "Running without root privileges, only backing up user home directory..."
     if [ "${HOME}" != "" ]; then
+        desktop_notify "INFO" "Home directory backup" "rs-backup is starting a home directory backup (unprivileged)..."
         back_up_single_home_dir "$(realpath ${HOME})" "$(id -nu)"
+        _exit_code=$(($_exit_code | $?))
     else
         write_log 2 "Current user has no home directory, skipping."
     fi
+fi
+
+if [ $_exit_code -eq 0 ]; then
+    desktop_notify "SUCCESS" "Backup finished" "Your backup has successfully finished"
 fi
 
 write_log 4 "Removing lock file..."

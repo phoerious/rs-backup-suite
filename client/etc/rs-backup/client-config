@@ -54,3 +54,6 @@ PRINT_ERRORS=true
 
 # Send warnings to STDERR (implies PRINT_ERRORS=true)
 PRINT_WARNINGS=true
+
+# Show desktop notifications. Requires libnotify / notify-send.
+DESKTOP_NOTIFICATIONS=true
