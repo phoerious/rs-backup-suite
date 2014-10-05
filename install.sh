@@ -131,12 +131,12 @@ if [[ $MODE == "install" ]]; then
 		$MKDIR "$BKP_DIR"/usr/lib
 		$MKDIR "$BKP_DIR"/usr/share
 
-		if [[ "$DISTRIBUTION" == "Synology" ]]; then
-			$MKDIR "$BKP_DIR"/opt/bin
-		fi
 
 		if [[ "$DISTRIBUTION" == "Ubuntu" ]]; then
 			$MKDIR "$BKP_DIR"/usr/share/perl
+		elif [[ "$DISTRIBUTION" == "Synology" ]]; then
+			$MKDIR "$BKP_DIR"/opt/bin
+			$MKDIR "$BKP_DIR"/opt/lib/perl5
 		else
 			$MKDIR "$BKP_DIR"/usr/share/perl5
 		fi
