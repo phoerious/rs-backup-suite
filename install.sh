@@ -52,7 +52,7 @@ fi
 ###############################################################################
 # Command aliases
 ###############################################################################
-CP="cp -vr --preserve=mode,timestamps,links,xattr"
+CP="cp -vr --preserve=mode,timestamps,links"
 RM="rm -Rvf"
 MKDIR="mkdir -pv"
 
