@@ -82,7 +82,7 @@ To set up the client you simply need to run
 
     sudo ./install.sh client
 
-on your client machine. Then copy the file `/etc/rs-backup/client-config.example` to `/etc/rs-backup/client-config`, edit it as root and replace the value of `REMOTE_HOST` with the hostname or IP address of your NAS.
+on your client machine. Then open the file `/etc/rs-backup/client-config` as root and replace the value of `REMOTE_HOST` with the hostname or IP address of your NAS.
 
 On the client machines the script `/usr/bin/rs-backup-run` is used for performing the backups. This script can either be run as root or as an unprivileged user. The behavior differs in both cases:
 
