@@ -34,5 +34,4 @@ if [ "${BACKUP_ROOT}" == "" ] || [ "$(realpath ${BACKUP_ROOT})" == "/" ]; then
 	exit 1
 fi
 
-touch "${BACKUP_ROOT}/etc/passwd"
-cat /etc/passwd | grep "::${BACKUP_ROOT}/[^/:]\+:/bin/[^:]\+$" > "${BACKUP_ROOT}/etc/passwd"
+grep ":rs-backup user:${BACKUP_ROOT}/[^:]\+:[^:]\+$" /etc/passwd > "${BACKUP_ROOT}/etc/passwd"
