@@ -36,8 +36,10 @@ if $(echo "${SSH_ORIGINAL_COMMAND}" | grep -q "^\(internal-sftp\|/usr/lib/ssh/sf
 	[ -x /opt/libexec/sftp-server ] && exec /opt/libexec/sftp-server -R
 else
 	RSYNC=/usr/bin/rsync
-	[ ! -x $RSYNC ] && [ -x /opt/bin/rsync ] && RSYNC=/opt/bin/rsync
-	exec $RSYNC --server --daemon --config="${home_dir}/rsync.conf"
+	RSYNC_OPTS="--server --daemon --config='$home_dir/rsync.conf' ."
+	[ -x $RSYNC ] && exec $RSYNC $(eval echo $RSYNC_OPTS)
+	RSYNC=/opt/bin/rsync
+	[ -x $RSYNC ] && exec $RSYNC $(eval echo $RSYNC_OPTS)
 fi
 
 echo "Session failed." >&2
