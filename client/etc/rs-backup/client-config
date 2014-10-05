@@ -24,7 +24,7 @@ REMOTE_USER="%h-%u"
 #SSH_OPTIONS="-C -i .ssh/id_rsa"
 
 # Additional options for rsync
-#RSYNC_OPTIONS=""
+RSYNC_OPTIONS="--acls --hard-links --xattrs"
 
 # Global log file to use when running as root
 LOG_FILE="/var/log/rs-backup.log"
