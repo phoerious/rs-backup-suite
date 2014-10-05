@@ -43,15 +43,14 @@ for home_dir in "${BACKUP_ROOT}"/*; do
 		config=$(cat "${BACKUP_ROOT}/etc/rsnapshot.global.conf")
 
 		# Get number of preceding increments
-		config=$(echo "${config}" | grep -P '^retain\t')
-		config=$(echo "${config}" | grep -oPz "retain\t+(\w+)\t+(\d+)\nretain\s+${1}\t+" | sed -n 1p)
+		config=$(echo "${config}" | awk '$1 == "retain" && $2 == "'${1}'" { print lastline } { lastline = $0 }')
 		preceding_name=$(echo "${config}" | awk '{ print $2 }')
 		preceding_number=$(($(echo "${config}" | awk ' { print $3 }') - 1))
 		
 		# Continue if no proper preceding increment could be found
 		if [ "${preceding_name}" == "" ] || 
 		   [ ! -d "${home_dir}/${FILES_DIR}/${preceding_name}.${preceding_number}" ]; then
-			echo "Not rotating ${1}"
+			echo "Not enough preceding increments found, not rotating ${1}"
 			continue
 		fi
 
