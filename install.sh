@@ -204,6 +204,15 @@ elif [[ "$MODE" == "uninstall" ]]; then
 			$RM /usr/sbin/"$(basename $i)"
 		done
 
+		[ -e /etc/cron.daily/rs-backup-rotate ]   && $RM /etc/cron.daily/rs-backup-rotate
+		[ -e /etc/cron.weekly/rs-backup-rotate ]  && $RM /etc/cron.weekly/rs-backup-rotate
+		[ -e /etc/cron.monthly/rs-backup-rotate ] && $RM /etc/cron.monthly/rs-backup-rotate
+
+		if [ -e /etc/crontab ]; then
+			echo "Removing crontab entries..."
+			sed -i '/^@[a-z]\+ \+\/usr\/sbin\/rs-rotate-cron [a-z]\+$/d' /etc/crontab
+		fi
+
 		echo "Done."
 		
 	# Client component
