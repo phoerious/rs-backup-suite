@@ -123,18 +123,19 @@ if [[ $MODE == "install" ]]; then
 
 		echo "Creating backup directory structure at '$BKP_DIR'..."
 
-		$MKDIR "$BKP_DIR"/bin
+		#$MKDIR "$BKP_DIR"/bin
 		$MKDIR "$BKP_DIR"/dev
 		$MKDIR "$BKP_DIR"/etc
 		$MKDIR "$BKP_DIR"/lib
 		$MKDIR "$BKP_DIR"/usr/bin
-		$MKDIR "$BKP_DIR"/usr/lib
+		[[ "$DISTRIBUTION" != "Synology" ]] && $MKDIR "$BKP_DIR"/usr/lib
 
 		if [[ "$DISTRIBUTION" == "Ubuntu" ]]; then
 			$MKDIR "$BKP_DIR"/usr/share/perl
 		elif [[ "$DISTRIBUTION" == "Synology" ]]; then
 			$MKDIR "$BKP_DIR"/opt/bin
-			$MKDIR "$BKP_DIR"/opt/lib/perl5
+			$MKDIR "$BKP_DIR"/opt/lib
+			$MKDIR "$BKP_DIR"/opt/libexec
 		else
 			$MKDIR "$BKP_DIR"/usr/share/perl5
 		fi
