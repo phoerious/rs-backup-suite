@@ -26,7 +26,7 @@
 # THE SOFTWARE.
 ##
 
-VERSION="0.2.1"
+VERSION="0.2.2"
 
 echo -e "\e[1mrs-backup-suite\e[0m version ${VERSION}"
 echo "Copyright (C) 2013-2014 Janek Bevendorff"

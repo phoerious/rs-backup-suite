@@ -40,7 +40,7 @@
 # Additional internal config
 ###############################################################################
 
-_VERSION=0.2.1
+_VERSION=0.2.2
 _GLOBAL_INCLUSION_PATTERN_FILE="/etc/rs-backup/include-files"
 _FORCED_INCLUSION_PATTERN_FILE=""
 _SKIP_HOME_DIRS=false
