@@ -32,7 +32,7 @@ if [[ "$1" != "all" ]] && [[ "$1" != "client" ]] && [[ "$1" != "server" ]]; then
 	exit
 fi
 
-if [ $(id -u) -ne 0 ]; then
+if [ $(id -u) -ne 0 ] && [[ "$(uname -o)" != "Cygwin" ]]; then
 	echo "ERROR: This script must be run as root."
 	exit 1
 fi
