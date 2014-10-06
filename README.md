@@ -12,6 +12,8 @@ On the client machine(s) each user can create a file called `.rs-backup-include`
 ## Setup (please read this carefully before performing any actions!)
 rs-backup-suite is split into two parts: a client part for pushing the backup to the NAS and a server part which runs on the NAS itself.
 
+**NOTE:** Any command that necessarily needs to be run as root is preceded by `sudo` in this document. If `sudo` is not available on your system, make sure you are running the command in a root shell (e.g. using `su`).
+
 ### Server
 For installing the server component run
 
@@ -32,13 +34,13 @@ If you need to tweak the server settings, simply edit `/etc/rs-backup/server-con
 #### Adding a backup user
 A backup user is an unprivileged UNIX account on the server. Normally each user on each client has one corresponding backup user which he uses to log into the NAS. A backup user can be created by running
 
-    rs-add-user hostname username [ssh-public-key-file]
+    sudo rs-add-user hostname username [ssh-public-key-file]
 
 on the server where `hostname` is the name of the client host and `username` is the name of the user on that machine for whom this account is made. Of course you can use any other names for `hostname` and `username` as well, but it's generally a good idea to stick to this naming convention. The resulting UNIX username will be the combination of both.
 
 The optional third parameter specifies the path to the SSH public key file which the user will use to log into the NAS. If you don't specify it, the user won't be able to log in at all. But you can add one later at any time by running
 
-    rs-add-ssh-key hostname username ssh-public-key-file
+    sudo rs-add-ssh-key hostname username ssh-public-key-file
 
 `hostname` and `username` are the same as above and mandatory for identifying the user that should get the new key.
 
@@ -115,7 +117,7 @@ You can of course also install server and client on the same machine. This may b
 ## Uninstalling
 For uninstalling run
 
-    ./uninstall.sh [all|server|client]
+    sudo ./uninstall.sh [all|server|client]
 
 This removes all the scripts but preserves the data in `/bkp` (or whatever your backup folder is).
 
