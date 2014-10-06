@@ -147,6 +147,9 @@ To run the server component on Synology DSM, you need to install the following p
 * `openssh-sftp-server`
 * `util-linux-ng`
 
+### Cygwin
+The server component is incompatible with Cygwin for several reasons, but the client component works just fine. At the moment, though, there is no root mode for backing up all home directories at once. Desktop notifications are also unsupported.
+
 ## Warning to users of older versions
 `rs-backup` used to reside in `/usr/local` instead of `/usr`. With the addition of a proper Makefile in version 0.2.0 this has changed. The consequence is that older setups won't work with the new version without modifications. In order to update your setup you need to update the path to `rs-run-ssh-cmd` (now at `/usr/bin/rs-run-ssh-cmd`) inside your users' `~/.ssh/authorized_keys` files as well as the path to `rs-rotate` (`/usr/bin/rs-rotate`) inside their `rsync.conf` files. Alternatively just create symlinks to the old locations.
 
