@@ -77,6 +77,19 @@ To change how many increments of which level are kept, edit the file `/bkp/etc/r
 
 If you add or remove any backup levels, make sure you also update the cron scripts. By default three cron scripts are installed: `/etc/cron.daily/rs-backup-rotate`, `/etc/cron.weekly/rs-backup-rotate` and `/etc/cron.monthly/rs-backup-rotate`.
 
+#### Quota support
+rs-backup-suite directly supports Linux file system quota. To make use of it, you need to enable quota for your backup drive first (i.e install the necessary utility packages, mount the backup drive with needed mount options and initialize quota files). This is pretty much straight-forward and not in any way different to any other Linux system. If you need assistance with setting up quota, I recommend you read [this quota guide](http://www.linux.com/learn/tutorials/393886-enable-per-user-disk-quotas-in-linux).
+
+Once disk quota are set up, you can change the value of `SET_QUOTA` in `/etc/rs-backup/server-config` to `true` and tweak the `QUOTA_*` directives to your liking. Any new user you create with `rs-add-user` will now be assigned these initial default quota.
+
+Of course you can change these default quota at any time using `rs-setquota`. For instance:
+
+    rs-setquota local-username 500G 505G 4M 5M
+
+This sets soft quota for the user `local-username` to 500GiB, hard quota to 505GiB, inode soft limit to 4194304 and inode hard limit to 5242880. You can, of course, set quota like this even when `SET_QUOTA` is `false`.
+
+Editing quota using native Linux quota tools (i.e. `setquota` or `edquota`) is also possible (in fact, `rs-setquota` only provides a more user-friendly frontend to `setquota`).
+
 ### Client
 To set up the client you simply need to run
 
