@@ -7,11 +7,19 @@ USER_GROUP="backup"
 # Directory containing the actual backup files (relative to BACKUP_ROOT/<user>)
 FILES_DIR="files"
 
-# Set quota for individual backup users
+# Set default quota for new users
 SET_QUOTA=false
 
-# Quota limits (use 0 for no limit)
+# Mount point for backup device that has quota enabled
+# If nothing is set, quota will be set for all available quota-enabled devices
+QUOTA_MOUNT_POINT=""
+
+# Default quota limits. Hard and soft size limit are in bytes (min. 1024)
 # Numbers may also end with k, M, G or T for magnitudes of 1024
+#
+# These numbers are only the defaults. If you want to change them later for
+# individual users, you can do that with rs-setquota or directly using
+# the native Linux quota tools (i.e. setquota / edquota)
 QUOTA_SOFT_LIMIT="350G"
 QUOTA_HARD_LIMIT="355G"
 QUOTA_INODE_SOFT_LIMIT="3900k"

@@ -88,6 +88,10 @@ fi
 
 rs-update-passwd
 
+if $SET_QUOTA; then
+	rs-setquota "${local_username}"
+fi
+
 # Generate config files from templates
 rsync_conf="$(cat /etc/rs-backup/rsync.conf.template)"
 rsnapshot_conf="$(cat /etc/rs-backup/rsnapshot.conf.template)"

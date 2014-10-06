@@ -1,0 +1,83 @@
+#!/bin/sh
+##
+# Copyright (C) 2013-2014 Janek Bevendorff
+# Website: http://www.refining-linux.org/
+# 
+# Set quota for user
+# 
+# The MIT License (MIT)
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+##
+
+if [[ "$1" == "" ]]; then
+	. rs-version
+	echo "Usage: $(basename $0) <username> [<soft limit> <hard limit> <inode soft limit> <inode hard limit>]"
+	echo "       Limits are in bytes and can contain the postfixes k, M, G, T."
+	echo "       If no limits are specified the default values from the config file will be used."
+	exit
+fi
+
+. /etc/rs-backup/server-config
+
+if ! $QUOTA_MOUNT_POINT; then
+	echo "ERROR: No mount point specified in config files." >&2
+	exit 1
+fi
+
+if [[ "$2" == "" ]] && [[ "$QUOTA_HARD_LIMIT" == "" ]]; then
+	echo "ERROR: No limits have been specified. You need to set at least default values in your config file." >&2
+	exit 1
+fi
+
+# Expand postfixes (kilobytes, megabytes, gigabytes, terabytes)
+# and calculate number
+expand_postfixes() {
+	local number=$1
+
+	number=$(echo "$number" | sed 's/k$/ * 1024/I')
+	number=$(echo "$number" | sed 's/M$/ * 1024 * 1024/I')
+	number=$(echo "$number" | sed 's/G$/ * 1024 * 1024 * 1024/I')
+	number=$(echo "$number" | sed 's/T$/ * 1024 * 1024 * 1024 * 1024/I')
+	number=$(echo "$number" | sed 's/[^0-9\*]//g')
+
+	number=$(eval "echo $(($number))")
+	echo "$number"
+}
+
+block_size=1024
+quota_file_system="$QUOTA_MOUNT_POINT"
+if [[ "$quote_file_system" == "" ]]; then
+	quota_file_system="-a"
+fi
+
+soft_limit=$(expand_postfixes "$QUOTA_SOFT_LIMIT")
+hard_limit=$(expand_postfixes "$QUOTA_HARD_LIMIT")
+inode_soft_limit=$(expand_postfixes "$QUOTA_INODE_SOFT_LIMIT")
+inode_hard_limit=$(expand_postfixes "$QUOTA_INODE_HARD_LIMIT")
+
+[[ "$2" != "" ]] && soft_limit=$(expand_postfixes "$2")
+[[ "$3" != "" ]] && hard_limit=$(expand_postfixes "$3")
+[[ "$4" != "" ]] && inode_soft_limit=$(expand_postfixes "$4")
+[[ "$5" != "" ]] && inode_hard_limit=$(expand_postfixes "$5")
+
+soft_limit=$(($soft_limit / $block_size))
+hard_limit=$(($hard_limit / $block_size))
+
+setquota "$1" "$soft_limit" "$hard_limit" "$inode_soft_limit" "$inode_hard_limit" "$quota_file_system"
