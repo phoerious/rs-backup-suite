@@ -84,7 +84,7 @@ Once disk quota are set up, you can change the value of `SET_QUOTA` in `/etc/rs-
 
 Of course you can change these default quota at any time using `rs-setquota`. For instance:
 
-    rs-setquota local-username 500G 505G 4M 5M
+    sudo rs-setquota local-username 500G 505G 4M 5M
 
 This sets soft quota for the user `local-username` to 500GiB, hard quota to 505GiB, inode soft limit to 4194304 and inode hard limit to 5242880. You can, of course, set quota like this even when `SET_QUOTA` is `false`.
 
