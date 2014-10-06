@@ -63,7 +63,7 @@ expand_postfixes() {
 
 block_size=1024
 quota_file_system="$QUOTA_MOUNT_POINT"
-if [[ "$quote_file_system" == "" ]]; then
+if [[ "$quota_file_system" == "" ]]; then
 	quota_file_system="-a"
 fi
 
