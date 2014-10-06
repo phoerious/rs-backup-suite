@@ -37,5 +37,11 @@ if [ "$RSYNC_EXIT_STATUS" == "" ]; then
 fi
 
 if [ $RSYNC_EXIT_STATUS -eq 0 ] || [ $RSYNC_EXIT_STATUS -eq 24 ]; then
-       	rsnapshot -c "$1" push
+    RSNAPSHOT="rsnapshot"
+    if [ -x /usr/bin/rsnapshot ]; then
+        RSNAPSHOT="/usr/bin/rsnapshot"
+    elif [ -x /opt/bin/rsnapshot ]; then
+        RSNAPSHOT="/opt/bin/rsnapshot"
+    fi
+    $RSNAPSHOT -c "$1" push
 fi
