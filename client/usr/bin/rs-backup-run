@@ -169,6 +169,11 @@ desktop_notify() {
     local urgency
     local user
 
+    if [[ "$(uname -o)" == "Cygwin" ]]; then
+        # not implemented
+        return
+    fi
+
     command -v notify-send > /dev/null 2>&1
     if [ $? -ne 0 ]; then
         # notify-send not available
