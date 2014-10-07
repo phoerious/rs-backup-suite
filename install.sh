@@ -85,6 +85,7 @@ if [[ $MODE == "install" ]]; then
 			if ! grep -q "/usr/sbin/rs-rotate-cron" /etc/crontab; then
 				if [[ "$DISTRIBUTION" == "Synology" ]]; then
 					cat ./server/etc/crontab_synology >> /etc/crontab
+					synoservicectl --reload crond
 				else
 					cat ./server/etc/crontab >> /etc/crontab
 				fi
