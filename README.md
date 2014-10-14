@@ -50,21 +50,28 @@ The optional third parameter specifies the path to the SSH public key file which
 rs-backup-suite can chroot backup users into the backup home base directory. For this to work you need to create a few bind mounts. The install script already created the respective lines in your `/etc/fstab` for you. If you don't need any special configuration on your system, all you need to do is to uncomment everything between the `BEGIN` and `END` lines (do NOT change these two lines, though):
 
     # BEGIN: rs-backup-suite
-    #/bin                    /bkp/bin                 none    bind,ro          0       0
-    #/lib                    /bkp/lib                 none    bind,ro          0       0
-    #/dev                    /bkp/dev                 none    bind,ro          0       0
-    #/usr/bin                /bkp/usr/bin             none    bind,ro          0       0
-    #/usr/lib                /bkp/usr/lib             none    bind,ro          0       0
-    #/usr/share/perl5        /bkp/usr/share/perl5     none    bind,ro          0       0
+    #/bin               /bkp/bin                none    bind          0    0
+    #/bin               /bkp/bin                none    remount,ro    0    0
+    #/lib               /bkp/lib                none    bind          0    0
+    #/lib               /bkp/lib                none    remount,ro    0    0
+    #/dev               /bkp/dev                none    bind          0    0
+    #/dev               /bkp/dev                none    remount,ro    0    0
+    #/usr/bin           /bkp/usr/bin            none    bind          0    0
+    #/usr/bin           /bkp/usr/bin            none    remount,ro    0    0
+    #/usr/lib           /bkp/usr/lib            none    bind          0    0
+    #/usr/lib           /bkp/usr/lib            none    remount,ro    0    0
+    #/usr/share/perl5   /bkp/usr/share/perl5    none    bind          0    0
+    #/usr/share/perl5   /bkp/usr/share/perl5    none    remount,ro    0    0
     # END: rs-backup-suite
 
 The necessary mounts may differ from system to system. For instance, Ubuntu needs `/usr/share/perl` instead of `/usr/share/perl5`. Synology DSM doesn't need `/usr/share/*` at all, but requires `/opt/bin`, `/opt/lib` and `/opt/libexec`. But in most cases you don't need to worry about that since the install script tries to make the correct decisions for you.
 
 **NOTE:** If your 64-bit system doesn't have a `/lib` folder but only `/lib64` you may need to change the `/lib` line in your `/etc/fstab` as follows:
 
-    /lib64                  /bkp/lib64               none    bind             0       0
+    /lib64               /bkp/lib64                none    bind          0    0
+    /lib64               /bkp/lib64                none    remount,ro    0    0
 
-Don't forget to rename `/bkp/lib` to `/bkp/lib64`.
+Don't forget to rename `/bkp/lib` to `/bkp/lib64`. The do the same with `/usr/lib` / `/usr/lib64`.
 
 When you're done, add this to the end of your `/etc/ssh/sshd_config`:
     
@@ -166,13 +173,20 @@ To run the server component on Synology DSM, you need to install the following p
 If you want to run your backups in a chroot environment please note that `/etc/fstab` will be reset to its defaults when rebooting the disk station. To avoid configuration loss, no mount directives are added to `/etc/fstab`  by the install script. Instead the following entries are added to `/etc/rc` (which won't be overwritten upon reboot):
 
     # BEGIN: rs-backup-suite
-    #mount -o bind,ro /bin         /var/services/homes/bin
-    #mount -o bind,ro /lib         /var/services/homes/lib
-    #mount -o bind,ro /dev         /var/services/homes/dev
-    #mount -o bind,ro /usr/bin     /var/services/homes/usr/bin
-    #mount -o bind,ro /opt/bin     /var/services/homes/opt/bin
-    #mount -o bind,ro /opt/lib     /var/services/homes/opt/lib
-    #mount -o bind,ro /opt/libexec /var/services/homes/opt/libexec
+    #mount -o bind       /bin                        /var/services/homes/bin
+    #mount -o remount,ro /var/services/homes/bin
+    #mount -o bind       /lib                        /var/services/homes/lib
+    #mount -o remount,ro /var/services/homes/lib
+    #mount -o bind       /dev                        /var/services/homes/dev
+    #mount -o remount,ro /var/services/homes/dev
+    #mount -o bind       /usr/bin                    /var/services/homes/usr/bin
+    #mount -o remount,ro /var/services/homes/usr/bin
+    #mount -o bind       /opt/bin                    /var/services/homes/opt/bin
+    #mount -o remount,ro /var/services/homes/opt/bin
+    #mount -o bind       /opt/lib                    /var/services/homes/opt/lib
+    #mount -o remount,ro /var/services/homes/opt/lib
+    #mount -o bind       /opt/libexec                /var/services/homes/opt/libexec
+    #mount -o remount,ro /var/services/homes/opt/libexec
     # END: rs-backup-suite
 
 To enable the mounts, uncomment everything between the `BEGIN` and `END` block. Afterwards either run these commands by hand once or reboot.
