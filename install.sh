@@ -142,16 +142,30 @@ if [[ $MODE == "install" ]]; then
 		fi
 
 		# Append fstab entries
-		if ! grep -q "^# BEGIN: rs-backup-suite" /etc/fstab; then
-			if [[ "$DISTRIBUTION" == "Ubuntu" ]]; then
-				fstab_name="fstab_ubuntu"
-			elif [[ "$DISTRIBUTION" == "Synology" ]]; then
-				fstab_name="fstab_synology"
-			else
-				fstab_name="fstab"
+		if [[ "$DISTRIBUTION" == "Synology" ]]; then
+				# Synology DSM restores default /etc/fstab upon reboot,
+				# so we better put mount commands in /etc/rc
+				if ! grep -q "^# BEGIN: rs-backup-suite" /etc/rc; then
+					tmp_name="/tmp/rs-backup_etc-rc.$RANDOM"
+					fstab_contents="$(cat ./server/etc/fstab_synology | sed "s#::BACKUP_ROOT::#$BKP_DIR#")"
+					tac /etc/rc | sed -e '1!b' -e '/^exit 0$/d' | tac > $tmp_name
+					echo "$fstab_contents" >> $tmp_name
+					echo "exit 0" >> $tmp_name
+					cat $tmp_name > /etc/rc
+					rm $tmp_name
+				fi
+		else
+			if ! grep -q "^# BEGIN: rs-backup-suite" /etc/fstab; then
+				if [[ "$DISTRIBUTION" == "Ubuntu" ]]; then
+					fstab_local_name="fstab_ubuntu"
+				elif [[ "$DISTRIBUTION" == "Synology" ]]; then
+					fstab_local_name="fstab_synology"
+				else
+					fstab_local_name="fstab"
+				fi
+				fstab_contents="$(cat ./server/etc/$fstab_local_name | sed "s#::BACKUP_ROOT::#$BKP_DIR#")"
+				echo "$fstab_contents" >> /etc/fstab
 			fi
-			fstab_contents="$(cat ./server/etc/$fstab_name | sed "s#::BACKUP_ROOT::#$BKP_DIR#")"
-			echo "$fstab_contents" >> /etc/fstab
 		fi
 
 		# Do not overwrite existing config
@@ -238,7 +252,11 @@ elif [[ "$MODE" == "uninstall" ]]; then
 		fi
 
 		# Remove fstab entries
-		sed -i '/^# BEGIN: rs-backup-suite$/,/^# END: rs-backup-suite$/d' /etc/fstab
+		fstab_name="/etc/fstab"
+		if [[ "$DISTRIBUTION" == "Synology" ]]; then
+			fstab_name="/etc/rc"
+		fi
+		sed -i '/^# BEGIN: rs-backup-suite$/,/^# END: rs-backup-suite$/d' $fstab_name
 
 		echo "Done."
 		

@@ -1,7 +1,7 @@
 # BEGIN: rs-backup-suite
-#/lib                    ::BACKUP_ROOT::/lib                 none    bind             0       0
-#/dev                    ::BACKUP_ROOT::/dev                 none    bind             0       0
-#/usr/bin                ::BACKUP_ROOT::/usr/bin             none    bind             0       0
-#/usr/lib                ::BACKUP_ROOT::/usr/lib             none    bind             0       0
-#/usr/share/perl         ::BACKUP_ROOT::/usr/share/perl      none    bind             0       0
+#/lib				::BACKUP_ROOT::/lib				none	bind	0	0
+#/dev				::BACKUP_ROOT::/dev				none	bind	0	0
+#/usr/bin			::BACKUP_ROOT::/usr/bin			none	bind	0	0
+#/usr/lib			::BACKUP_ROOT::/usr/lib			none	bind	0	0
+#/usr/share/perl	::BACKUP_ROOT::/usr/share/perl	none	bind	0	0
 # END: rs-backup-suite

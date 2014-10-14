@@ -162,6 +162,19 @@ To run the server component on Synology DSM, you need to install the following p
 * `openssh-sftp-server`
 * `util-linux-ng`
 
+If you want to run your backups in a chroot environment please note that `/etc/fstab/` will be reset to its defaults when rebooting the disk station. To avoid configuration loss, no mount directives are added to `/etc/fstab`  by the install script. Instead the following entries are added to `/etc/rc` (which won't be overwritten upon reboot):
+
+    # BEGIN: rs-backup-suite
+    #mount -o bind /lib         /var/services/homes/lib
+    #mount -o bind /dev         /var/services/homes/dev
+    #mount -o bind /usr/bin     /var/services/homes/usr/bin
+    #mount -o bind /opt/bin     /var/services/homes/opt/bin
+    #mount -o bind /opt/lib     /var/services/homes/opt/lib
+    #mount -o bind /opt/libexec /var/services/homes/opt/libexec
+    # END: rs-backup-suite
+
+To enable the mounts, uncomment everything between the `BEGIN` and `END` block. Afterwards either run these commands by hand once or reboot.
+
 ### Cygwin
 The server component is incompatible with Cygwin for several reasons, but the client component works just fine. At the moment, though, there is no root mode for backing up all home directories at once. Desktop notifications are also unsupported.
 
