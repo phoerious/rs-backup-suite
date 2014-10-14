@@ -162,7 +162,7 @@ To run the server component on Synology DSM, you need to install the following p
 * `openssh-sftp-server`
 * `util-linux-ng`
 
-If you want to run your backups in a chroot environment please note that `/etc/fstab/` will be reset to its defaults when rebooting the disk station. To avoid configuration loss, no mount directives are added to `/etc/fstab`  by the install script. Instead the following entries are added to `/etc/rc` (which won't be overwritten upon reboot):
+If you want to run your backups in a chroot environment please note that `/etc/fstab` will be reset to its defaults when rebooting the disk station. To avoid configuration loss, no mount directives are added to `/etc/fstab`  by the install script. Instead the following entries are added to `/etc/rc` (which won't be overwritten upon reboot):
 
     # BEGIN: rs-backup-suite
     #mount -o bind /lib         /var/services/homes/lib
