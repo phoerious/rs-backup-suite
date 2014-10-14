@@ -50,6 +50,7 @@ The optional third parameter specifies the path to the SSH public key file which
 rs-backup-suite can chroot backup users into the backup home base directory. For this to work you need to create a few bind mounts. The install script already created the respective lines in your `/etc/fstab` for you. If you don't need any special configuration on your system, all you need to do is to uncomment everything between the `BEGIN` and `END` lines (do NOT change these two lines, though):
 
     # BEGIN: rs-backup-suite
+    #/bin                    /bkp/bin                 none    bind             0       0
     #/lib                    /bkp/lib                 none    bind             0       0
     #/dev                    /bkp/dev                 none    bind             0       0
     #/usr/bin                /bkp/usr/bin             none    bind             0       0
@@ -165,6 +166,7 @@ To run the server component on Synology DSM, you need to install the following p
 If you want to run your backups in a chroot environment please note that `/etc/fstab` will be reset to its defaults when rebooting the disk station. To avoid configuration loss, no mount directives are added to `/etc/fstab`  by the install script. Instead the following entries are added to `/etc/rc` (which won't be overwritten upon reboot):
 
     # BEGIN: rs-backup-suite
+    #mount -o bind /bin         /var/services/homes/bin
     #mount -o bind /lib         /var/services/homes/lib
     #mount -o bind /dev         /var/services/homes/dev
     #mount -o bind /usr/bin     /var/services/homes/usr/bin

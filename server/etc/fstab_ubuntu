@@ -1,4 +1,5 @@
 # BEGIN: rs-backup-suite
+#/bin				::BACKUP_ROOT::/bin				none	bind	0	0
 #/lib				::BACKUP_ROOT::/lib				none	bind	0	0
 #/dev				::BACKUP_ROOT::/dev				none	bind	0	0
 #/usr/bin			::BACKUP_ROOT::/usr/bin			none	bind	0	0

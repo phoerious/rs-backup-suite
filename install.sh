@@ -124,7 +124,7 @@ if [[ $MODE == "install" ]]; then
 
 		echo "Creating backup directory structure at '$BKP_DIR'..."
 
-		#$MKDIR "$BKP_DIR"/bin
+		$MKDIR "$BKP_DIR"/bin
 		$MKDIR "$BKP_DIR"/dev
 		$MKDIR "$BKP_DIR"/etc
 		$MKDIR "$BKP_DIR"/lib

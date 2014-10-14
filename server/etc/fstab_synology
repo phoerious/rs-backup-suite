@@ -1,4 +1,5 @@
 # BEGIN: rs-backup-suite
+#mount -o bind /bin         ::BACKUP_ROOT::/bin
 #mount -o bind /lib         ::BACKUP_ROOT::/lib
 #mount -o bind /dev         ::BACKUP_ROOT::/dev
 #mount -o bind /usr/bin     ::BACKUP_ROOT::/usr/bin
