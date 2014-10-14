@@ -1,9 +1,9 @@
 # BEGIN: rs-backup-suite
-#mount -o bind /bin         ::BACKUP_ROOT::/bin
-#mount -o bind /lib         ::BACKUP_ROOT::/lib
-#mount -o bind /dev         ::BACKUP_ROOT::/dev
-#mount -o bind /usr/bin     ::BACKUP_ROOT::/usr/bin
-#mount -o bind /opt/bin     ::BACKUP_ROOT::/opt/bin
-#mount -o bind /opt/lib     ::BACKUP_ROOT::/opt/lib
-#mount -o bind /opt/libexec ::BACKUP_ROOT::/opt/libexec
+#mount -o bind,ro /bin         ::BACKUP_ROOT::/bin
+#mount -o bind,ro /lib         ::BACKUP_ROOT::/lib
+#mount -o bind,ro /dev         ::BACKUP_ROOT::/dev
+#mount -o bind,ro /usr/bin     ::BACKUP_ROOT::/usr/bin
+#mount -o bind,ro /opt/bin     ::BACKUP_ROOT::/opt/bin
+#mount -o bind,ro /opt/lib     ::BACKUP_ROOT::/opt/lib
+#mount -o bind,ro /opt/libexec ::BACKUP_ROOT::/opt/libexec
 # END: rs-backup-suite
