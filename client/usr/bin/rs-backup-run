@@ -185,7 +185,7 @@ desktop_notify() {
     fi
 
     user=$(who | awk '/:0/ { print $1; exit; }')
-    if [ $(id -u) -ne 0 ] && [ $(id -u "$user") -ne $(id -u) ]; then
+    if [ $(id -u) -ne 0 ] && [[ "$user" != "" ]] && [ $(id -u "$user") -ne $(id -u) ]; then
         # we're neither root nor the current user on display :0.0,
         # so don't show any notification
         return
