@@ -55,7 +55,7 @@ for home_dir in "${BACKUP_ROOT}"/*; do
 		fi
 
 		cd "${home_dir}/${FILES_DIR}"
-		owner=$(ls -ld "${home_dir}/${FILES_DIR}" | awk '{ print $3 }')
+		owner=$(stat -c '%U' .)
 
 		su - "${owner}" -c "rsnapshot -c '${home_dir}/rsnapshot.conf' '$1'"
 	fi
