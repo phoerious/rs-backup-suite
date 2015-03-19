@@ -55,7 +55,12 @@ for home_dir in "${BACKUP_ROOT}"/*; do
 		fi
 
 		cd "${home_dir}/${FILES_DIR}"
-		owner=$(stat -c '%U' .)
+		stat_cmd="stat"
+		# avoid using BusyBox stat on Synology
+		if [ -x /opt/bin/stat ]; then
+			stat_cmd="/opt/bin/stat"
+		fi
+		owner=$(${stat_cmd} -c '%U' .)
 
 		su - "${owner}" -c "rsnapshot -c '${home_dir}/rsnapshot.conf' '$1'"
 	fi
