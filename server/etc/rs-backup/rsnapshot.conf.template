@@ -1,4 +1,4 @@
-include_conf	${BACKUP_ROOT}/etc/rs-backup/rsnapshot.global.conf
+include_conf	${BACKUP_ROOT}/etc/rsnapshot.global.conf
 
 snapshot_root	${HOME_DIR}/${FILES_DIR}
 logfile			${HOME_DIR}/rsnapshot.log
