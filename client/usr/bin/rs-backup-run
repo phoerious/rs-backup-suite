@@ -385,6 +385,9 @@ perform_backup() {
         --archive \
         --delete \
         --delete-excluded \
+        --exclude=\"${_RUNFILE}\" \
+        --exclude=\"${LOG_FILE}\" \
+        --exclude=\"${USER_LOG_FILE}\" \
         --include-from=\"${inclusion_pattern_file}\" \
         --exclude=\"*\" \
         ${rsync_opts} \
