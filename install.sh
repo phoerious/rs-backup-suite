@@ -207,6 +207,8 @@ if [[ $MODE == "install" ]]; then
 		# Do not overwrite existing config
 		if [ ! -e /etc/rs-backup/client-config ]; then
 			$CP ./client/etc/rs-backup /etc/
+		elif ! $(cmp --silent ./client/etc/rs-backup/client-config /etc/rs-backup/client-config); then
+			$CP ./client/etc/rs-backup/client-config /etc/rs-backup/client-config.new
 		fi
 
 		echo "Done."
