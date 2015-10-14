@@ -1,6 +1,6 @@
 #!/bin/sh
 ##
-# Copyright (C) 2013-2014 Janek Bevendorff
+# Copyright (C) 2013-2015 Janek Bevendorff
 # Website: http://www.refining-linux.org/
 # 
 # Print out version and copyright information for rs-backup.
@@ -26,7 +26,29 @@
 # THE SOFTWARE.
 ##
 
-VERSION="0.2.2"
+_VERSION="0.2.3"
 
-echo -e "\e[1mrs-backup-suite\e[0m version ${VERSION}"
-echo "Copyright (C) 2013-2014 Janek Bevendorff"
+headline() {
+    if [ "$1" != "" ]; then
+        component="$1"
+    else
+        component="rs-backup-suite"
+    fi
+    echo -e "\e[1m${component}\e[0m version ${_VERSION}"
+}
+
+copyright() {
+    echo "Copyright (C) 2013-2015 Janek Bevendorff"
+    echo "Website: https://github.com/Manko10/rs-backup-suite"
+}
+
+if [ "$1" == "version" ]; then
+    echo -n "${_VERSION}"
+elif [ "$1" == "headline" ]; then
+    headline "$2"
+elif [ "$1" == "copyright" ]; then
+    copyright
+else
+    headline
+    copyright
+fi

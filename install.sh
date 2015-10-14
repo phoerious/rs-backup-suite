@@ -1,6 +1,6 @@
 #!/bin/sh
 ##
-# Copyright (C) 2013-2014 Janek Bevendorff
+# Copyright (C) 2013-2015 Janek Bevendorff
 # Website: http://www.refining-linux.org/
 # 
 # Install script for installing server and client script files
@@ -27,7 +27,9 @@
 ##
 
 if [[ "$1" != "all" ]] && [[ "$1" != "client" ]] && [[ "$1" != "server" ]]; then
-	./server/usr/bin/rs-version
+	./server/usr/bin/rs-version headline "rs-backup-suite installer"
+	./server/usr/bin/rs-version copyright
+	echo
 	echo "Usage: $(basename $0) [all|server|client]"
 	exit
 fi
@@ -203,6 +205,7 @@ if [[ $MODE == "install" ]]; then
 		echo "Installing client component..."
 
 		$CP ./client/usr/bin/* /usr/bin/
+		$CP ./server/usr/bin/rs-version /usr/bin/
 
 		# Do not overwrite existing config
 		if [ ! -e /etc/rs-backup/client-config ]; then
