@@ -28,7 +28,7 @@
 
 home_dir=$1
 
-if $(echo "${SSH_ORIGINAL_COMMAND}" | grep -q "^\(internal-sftp\|/usr/lib/ssh/sftp-server\)"); then
+if $(echo "${SSH_ORIGINAL_COMMAND}" | grep -q "^\(internal-sftp\|.*/sftp-server\)"); then
 	export HOME="${home_dir}/files"
 	cd $HOME
 	[ -x /usr/lib/ssh/sftp-server ] && exec /usr/lib/ssh/sftp-server -R
