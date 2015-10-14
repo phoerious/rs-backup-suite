@@ -397,12 +397,12 @@ perform_backup() {
 
     if [ $(id -u) -eq 0 ] && [ "${username}" != "$(id -un)" ]; then
         write_log 4 "Running backup with privileges of user '${username}' (UID: $(id -u ${username}))..."
-        msg=$(su - "${username}" -c "${backup_cmd}" 2>&1 | tee "${tee_device}")
+        msg=$(su - "${username}" -c "${backup_cmd}" 3>&1 1>&2 2>&3- | tee "${tee_device}")
     elif [ $(id -u) -ne 0 ] && [ "${username}" != "$(id -un)" ]; then
         write_log 1 "Cannot run run backup as user '${username}' (UID: $(id -u ${username}), missing root privileges!"
         return 1
     else
-        msg=$(sh -c "${backup_cmd}" 2>&1 | tee "${tee_device}")
+        msg=$(sh -c "${backup_cmd}" 3>&1 1>&2 2>&3-  | tee "${tee_device}")
     fi
 
     exit_code=$?
