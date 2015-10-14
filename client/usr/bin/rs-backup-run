@@ -52,6 +52,12 @@ _DRY_RUN=false
 _FORCE_RUN=false
 _ERROR_COUNT=0
 
+if [ $(id -u) -eq 0 ]; then
+    _RUNFILE="/var/run/rs-backup/rs-backup-run.pid"
+else
+    _RUNFILE="${HOME}/.rs-backup/rs-backup-run.pid"
+fi
+
 
 ###############################################################################
 # Function declarations
@@ -158,6 +164,41 @@ write_log() {
     if [ $1 -eq 1 ]; then
         _ERROR_COUNT=$(($_ERROR_COUNT + 1))
     fi
+}
+
+
+# Create runfile containing current PID
+#
+# Usage: create_runfile
+#
+create_runfile() {
+    write_log 4 "Creating runfile (PID=${$}) at '${_RUNFILE}'..."
+    if [ ! -d "$(dirname $_RUNFILE)" ]; then
+        mkdir -p "$(dirname $_RUNFILE)"
+    fi
+    echo $$ > "$_RUNFILE"
+}
+
+# Remove created runfile
+#
+# Usage: remove_runfile
+#
+remove_runfile() {
+    write_log 4 "Removing runfile at '${_RUNFILE}'..."
+    rm -f "$_RUNFILE"
+    # also remove parent directory, but only if empty
+    # redirect error output since --ignore-fail-on-non-empty is not POSIX
+    rmdir "$(dirname $_RUNFILE)" > /dev/null 2>&1
+}
+
+# Handle script termination by external signals.
+#
+# Usage: handle_signals
+#
+handle_exit_signal() {
+    write_log 1 "Program terminated upon user request."
+    remove_runfile
+    exit 1
 }
 
 # Show a desktop notification using notify-send
@@ -445,7 +486,7 @@ back_up_home_dirs() {
     return $exit_code
 }
 
-# Prase command line args
+# Parse command line args
 # 
 # Usage: parse_cmd_args <cmd arg line>
 # 
@@ -538,20 +579,28 @@ parse_cmd_args() {
 ###############################################################################
 # Initialize the actual backup
 ###############################################################################
+
+# Register exit trap to catch signals and cleanly shut down the script
+trap handle_exit_signal SIGHUP SIGINT SIGTERM
+
 parse_cmd_args "$@"
 
 # Check if a backup is already running
-if [ -f /tmp/rs-backup.lock ] && ! $_FORCE_RUN; then
-    write_log 1 "Backup lock file exists. Either a backup is already running or it didn't shut down properly last time."
-    write_log 1 "If you're sure no backup is running right now, remove the lock file '/tmp/rs-backup.lock' or use the '--force-run' parameter."
+if [ -f "$_RUNFILE" ] && ! $_FORCE_RUN; then
+    write_log 1 "rs-backup is already running as PID $(<$_RUNFILE)."
+    write_log 1 "Please finish any running backups before starting a new one."
+    write_log 1 "If you're sure you want to run another backup, either remove the runfile at " \
+       "'$_RUNFILE' or use the '--force-run' parameter."
     exit 1
 fi
 
-write_log 4 "No other backup running, ready to start."
+if [ ! -f "$_RUNFILE" ]; then
+    write_log 4 "No other backup running, ready to start."
+elif $_FORCE_RUN; then
+    write_log 4 "Backup already running as PID $(<$_RUNFILE), forcing parallel backup..."
+fi
 
-# Create lock file
-write_log 4 "Creating lock file..."
-touch /tmp/rs-backup.lock
+create_runfile
 
 # Backup exit code (0 if all backups have finished successfully)
 _exit_code=$?
@@ -584,8 +633,7 @@ if [ $_exit_code -eq 0 ]; then
     desktop_notify "SUCCESS" "Backup finished" "Your backup has successfully finished"
 fi
 
-write_log 4 "Removing lock file..."
-rm /tmp/rs-backup.lock
+remove_runfile
 
 write_log 4 "Done."
 
