@@ -1,0 +1,6 @@
+[Unit]
+Description=Start backup via rs-backup-suite
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/rs-backup-run

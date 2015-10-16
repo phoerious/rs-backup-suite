@@ -207,6 +207,11 @@ if [[ $MODE == "install" ]]; then
 		$CP ./client/usr/bin/* /usr/bin/
 		$CP ./server/usr/bin/rs-version /usr/bin/
 
+		if [ -d /etc/systemd/system ]; then
+			echo 'Detected systemd. Run `systemctl enable rs-backup-run.timer` to enable daily backups.'
+			$CP ./client/etc/systemd/system/* /etc/systemd/system
+		fi
+
 		# Do not overwrite existing config
 		if [ ! -e /etc/rs-backup/client-config ]; then
 			$CP ./client/etc/rs-backup /etc/
