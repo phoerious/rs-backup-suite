@@ -132,8 +132,23 @@ This removes all the scripts but preserves the data in `/bkp` (or whatever your 
 ## Backup strategies
 The intended use case for rs-backup-suite is as follows: you set up the server part on your NAS. Then you create a backup user for each user on each client machine.
 
+### Cron
 In the next step you edit the crontab for root on each client and add a job for running `/usr/bin/rs-backup-run` at certain times. You can of course also create a shell script that calls `rs-backup-run` and put it in `/etc/cron.daily` to perform a global backup once a day.
 
+### Alternative: systemd
+Since version 0.2.5, rs-backup-run comes with systemd unit files which you can use for automatically running daily backups instead.
+To enable the timer, run
+
+    systemctl enable rs-backup-run.timer
+    systemctl start rs-backup-run.timer
+
+This will enable the timer when booting the system. By default, the timer is set to run once every day (or immediately if the system was down during the last timer tick).
+
+You can also start a full system backup manually at any time by running
+
+    systemctl start rs-backup-run.service
+
+### Inclusion patterns
 After everything is set up that way you create the file `/etc/rs-backup/include-file` and write to it a list of files and folders you want to back up as root (e.g. you can specify `/etc/***` to backup the whole `/etc` directory and all its subdirectories). Furthermore each user creates a file called `.rs-backup/include` inside his home directory that serves the same purpose for his own home directory instead of the global system. Such a file could look like this:
 
     - /home/johndoe/.cache/***
