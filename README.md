@@ -183,25 +183,34 @@ To run the server component on Synology DSM, you need to install the following p
 
 * `rsnapshot`
 * `openssh-sftp-server`
+
+For DSM version 5.x and below you will also need
+
 * `util-linux-ng`
+
+In `/etc/ssh/sshd_config` make sure you replace whatever line contains the subsystem configuration for the sftp server with
+
+    Subsystem    sftp    /opt/libexec/sftp-server
+
+and restart the SSH server using the configuration utility from the web interace. If you are using the `synoservicectl` utility from the command line instead, make sure you are actually starting the correct SSH server from `/usr/sbin` and not from `/opt/sbin` (although that works as well, but would have a different configuration file).
 
 If you want to run your backups in a chroot environment please note that `/etc/fstab` will be reset to its defaults when rebooting the disk station. To avoid configuration loss, no mount directives are added to `/etc/fstab`  by the install script. Instead the following entries are added to `/etc/rc` (which won't be overwritten upon reboot):
 
     # BEGIN: rs-backup-suite
-    #mount -o bind       /bin                        /var/services/homes/bin
-    #mount -o remount,ro /var/services/homes/bin
-    #mount -o bind       /lib                        /var/services/homes/lib
-    #mount -o remount,ro /var/services/homes/lib
-    #mount -o bind       /dev                        /var/services/homes/dev
-    #mount -o remount,ro /var/services/homes/dev
-    #mount -o bind       /usr/bin                    /var/services/homes/usr/bin
-    #mount -o remount,ro /var/services/homes/usr/bin
-    #mount -o bind       /opt/bin                    /var/services/homes/opt/bin
-    #mount -o remount,ro /var/services/homes/opt/bin
-    #mount -o bind       /opt/lib                    /var/services/homes/opt/lib
-    #mount -o remount,ro /var/services/homes/opt/lib
-    #mount -o bind       /opt/libexec                /var/services/homes/opt/libexec
-    #mount -o remount,ro /var/services/homes/opt/libexec
+    #mount -o bind            /bin                        /var/services/homes/bin
+    #mount -o remount,ro,bind /var/services/homes/bin
+    #mount -o bind            /lib                        /var/services/homes/lib
+    #mount -o remount,ro,bind /var/services/homes/lib
+    #mount -o bind            /dev                        /var/services/homes/dev
+    #mount -o remount,ro,bind /var/services/homes/dev
+    #mount -o bind            /usr/bin                    /var/services/homes/usr/bin
+    #mount -o remount,ro,bind /var/services/homes/usr/bin
+    #mount -o bind            /opt/bin                    /var/services/homes/opt/bin
+    #mount -o remount,ro,bind /var/services/homes/opt/bin
+    #mount -o bind            /opt/lib                    /var/services/homes/opt/lib
+    #mount -o remount,ro,bind /var/services/homes/opt/lib
+    #mount -o bind            /opt/libexec                /var/services/homes/opt/libexec
+    #mount -o remount,ro,bind /var/services/homes/opt/libexec
     # END: rs-backup-suite
 
 To enable the mounts, uncomment everything between the `BEGIN` and `END` block. Afterwards either run these commands by hand once or reboot.
