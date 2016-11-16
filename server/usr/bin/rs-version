@@ -26,7 +26,7 @@
 # THE SOFTWARE.
 ##
 
-_VERSION="0.2.5"
+_VERSION="0.2.6"
 
 headline() {
     if [ "$1" != "" ]; then
@@ -38,7 +38,7 @@ headline() {
 }
 
 copyright() {
-    echo "Copyright (C) 2013-2015 Janek Bevendorff"
+    echo "Copyright (C) 2013-2016 Janek Bevendorff"
     echo "Website: https://github.com/Manko10/rs-backup-suite"
 }
 

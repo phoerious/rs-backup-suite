@@ -1,6 +1,6 @@
 #!/bin/sh
 ##
-# Copyright (C) 2013-2015 Janek Bevendorff
+# Copyright (C) 2013-2016 Janek Bevendorff
 # Website: http://www.refining-linux.org/
 # 
 # Install script for installing server and client script files
