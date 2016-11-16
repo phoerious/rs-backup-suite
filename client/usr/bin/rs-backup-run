@@ -251,7 +251,9 @@ desktop_notify() {
     esac
 
     if [[ "$user" != "" ]]; then
-        sudo -u "$user" DISPLAY=":0.0" notify-send -i "$icon" -u "$urgency" "rs-backup: $2" "$3"
+        dbus_pid=$(pgrep -u "$user" dbus-daemon | head -n1)
+        environment=$(xargs --null < /proc/$dbus_pid/environ)
+        sudo -u "$user" $environment notify-send -i "$icon" -u "$urgency" "rs-backup: $2" "$3"
     fi
 }
 
