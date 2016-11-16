@@ -50,18 +50,18 @@ The optional third parameter specifies the path to the SSH public key file which
 rs-backup-suite can chroot backup users into the backup home base directory. For this to work you need to create a few bind mounts. The install script already created the respective lines in your `/etc/fstab` for you. If you don't need any special configuration on your system, all you need to do is to uncomment everything between the `BEGIN` and `END` lines (do NOT change these two lines, though):
 
     # BEGIN: rs-backup-suite
-    #/bin               /bkp/bin                none    bind          0    0
-    #/bin               /bkp/bin                none    remount,ro    0    0
-    #/lib               /bkp/lib                none    bind          0    0
-    #/lib               /bkp/lib                none    remount,ro    0    0
-    #/dev               /bkp/dev                none    bind          0    0
-    #/dev               /bkp/dev                none    remount,ro    0    0
-    #/usr/bin           /bkp/usr/bin            none    bind          0    0
-    #/usr/bin           /bkp/usr/bin            none    remount,ro    0    0
-    #/usr/lib           /bkp/usr/lib            none    bind          0    0
-    #/usr/lib           /bkp/usr/lib            none    remount,ro    0    0
-    #/usr/share/perl5   /bkp/usr/share/perl5    none    bind          0    0
-    #/usr/share/perl5   /bkp/usr/share/perl5    none    remount,ro    0    0
+    #/bin               /bkp/bin                none    bind               0    0
+    #/bin               /bkp/bin                none    remount,ro,bind    0    0
+    #/lib               /bkp/lib                none    bind               0    0
+    #/lib               /bkp/lib                none    remount,ro,bind    0    0
+    #/dev               /bkp/dev                none    bind               0    0
+    #/dev               /bkp/dev                none    remount,ro,bind    0    0
+    #/usr/bin           /bkp/usr/bin            none    bind               0    0
+    #/usr/bin           /bkp/usr/bin            none    remount,ro,bind    0    0
+    #/usr/lib           /bkp/usr/lib            none    bind               0    0
+    #/usr/lib           /bkp/usr/lib            none    remount,ro,bind    0    0
+    #/usr/share/perl5   /bkp/usr/share/perl5    none    bind               0    0
+    #/usr/share/perl5   /bkp/usr/share/perl5    none    remount,ro,bind    0    0
     # END: rs-backup-suite
 
 The necessary mounts may differ from system to system. For instance, Ubuntu needs `/usr/share/perl` instead of `/usr/share/perl5`. Synology DSM doesn't need `/usr/share/*` at all, but requires `/opt/bin`, `/opt/lib` and `/opt/libexec`. But in most cases you don't need to worry about that since the install script tries to make the correct decisions for you.
