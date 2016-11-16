@@ -213,7 +213,10 @@ If you want to run your backups in a chroot environment please note that `/etc/f
     #mount -o remount,ro,bind /var/services/homes/opt/libexec
     # END: rs-backup-suite
 
-To enable the mounts, uncomment everything between the `BEGIN` and `END` block. Afterwards either run these commands by hand once or reboot.
+To enable the mounts, uncomment everything between the `BEGIN` and `END` block. Afterwards either run these commands by hand once or reboot. Of course, don't forget to also set the correct chroot path in `/etc/ssh/sshd_config` and restart the SSH daemon:
+    
+    Match Group backup 
+        ChrootDirectory /var/services/homes/
 
 ### Cygwin
 The server component is incompatible with Cygwin for several reasons, but the client component works just fine. At the moment, though, there is no root mode for backing up all home directories at once. Desktop notifications are also unsupported.
