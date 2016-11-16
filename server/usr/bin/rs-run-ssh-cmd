@@ -31,6 +31,7 @@ export HOME="${home_dir}/files"
 cd $HOME
 
 if $(echo "${SSH_ORIGINAL_COMMAND}" | grep -q "^\(internal-sftp\|.*/sftp-server\)"); then
+    [ -x /usr/lib/openssh/sftp-server ] && exec /usr/lib/openssh/sftp-server -R
     [ -x /usr/lib/ssh/sftp-server ] && exec /usr/lib/ssh/sftp-server -R
     [ -x /usr/libexec/sftp-server ] && exec /usr/libexec/sftp-server -R
     [ -x /opt/libexec/sftp-server ] && exec /opt/libexec/sftp-server -R
