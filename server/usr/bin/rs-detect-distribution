@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ##
-# Copyright (C) 2013-2014 Janek Bevendorff
+# Copyright (C) 2013-2016 Janek Bevendorff
 # Website: http://www.refining-linux.org/
 # 
 # Print out Linux distribution identification.
