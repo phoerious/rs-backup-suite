@@ -68,8 +68,8 @@ The necessary mounts may differ from system to system. For instance, Ubuntu need
 
 **NOTE:** If your 64-bit system doesn't have a `/lib` folder but only `/lib64` you may need to change the `/lib` line in your `/etc/fstab` as follows:
 
-    /lib64               /bkp/lib64                none    bind          0    0
-    /lib64               /bkp/lib64                none    remount,ro    0    0
+    /lib64               /bkp/lib64                none    bind               0    0
+    /lib64               /bkp/lib64                none    remount,ro,bind    0    0
 
 Don't forget to rename `/bkp/lib` to `/bkp/lib64`. The do the same with `/usr/lib` / `/usr/lib64`.
 

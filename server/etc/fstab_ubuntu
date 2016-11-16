@@ -1,14 +1,14 @@
 # BEGIN: rs-backup-suite
-#/bin				::BACKUP_ROOT::/bin				none	bind		0	0
-#/bin				::BACKUP_ROOT::/bin				none	remount,ro	0	0
-#/lib				::BACKUP_ROOT::/lib				none	bind		0	0
-#/lib				::BACKUP_ROOT::/lib				none	remount,ro	0	0
-#/dev				::BACKUP_ROOT::/dev				none	bind		0	0
-#/dev				::BACKUP_ROOT::/dev				none	remount,ro	0	0
-#/usr/bin			::BACKUP_ROOT::/usr/bin			none	bind		0	0
-#/usr/bin			::BACKUP_ROOT::/usr/bin			none	remount,ro	0	0
-#/usr/lib			::BACKUP_ROOT::/usr/lib			none	bind		0	0
-#/usr/lib			::BACKUP_ROOT::/usr/lib			none	remount,ro	0	0
-#/usr/share/perl	::BACKUP_ROOT::/usr/share/perl	none	bind		0	0
-#/usr/share/perl	::BACKUP_ROOT::/usr/share/perl	none	remount,ro	0	0
+#/bin				::BACKUP_ROOT::/bin				none	bind		    0	0
+#/bin				::BACKUP_ROOT::/bin				none	remount,ro,bind	0	0
+#/lib				::BACKUP_ROOT::/lib				none	bind		    0	0
+#/lib				::BACKUP_ROOT::/lib				none	remount,ro,bind	0	0
+#/dev				::BACKUP_ROOT::/dev				none	bind		    0	0
+#/dev				::BACKUP_ROOT::/dev				none	remount,ro,bind	0	0
+#/usr/bin			::BACKUP_ROOT::/usr/bin			none	bind		    0	0
+#/usr/bin			::BACKUP_ROOT::/usr/bin			none	remount,ro,bind	0	0
+#/usr/lib			::BACKUP_ROOT::/usr/lib			none	bind		    0	0
+#/usr/lib			::BACKUP_ROOT::/usr/lib			none	remount,ro,bind	0	0
+#/usr/share/perl	::BACKUP_ROOT::/usr/share/perl	none	bind		    0	0
+#/usr/share/perl	::BACKUP_ROOT::/usr/share/perl	none	remount,ro,bind	0	0
 # END: rs-backup-suite
