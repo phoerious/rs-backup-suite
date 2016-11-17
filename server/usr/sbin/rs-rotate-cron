@@ -63,5 +63,13 @@ for home_dir in "${BACKUP_ROOT}"/*; do
 		owner=$(${stat_cmd} -c '%U' .)
 
 		su - "${owner}" -c "rsnapshot -c '${home_dir}/rsnapshot.conf' '$1'"
+		rsnapshot_exit_code=$?
+		if [ $rsnapshot_exit_code -eq 1 ]; then
+			rs-logger err "Backup rotation for level '$1' of user '$(id -un)' failed."
+		elif [ $rsnapshot_exit_code -eq 2 ]; then
+			rs-logger warn "Backup rotation for level '$1' of user '$(id -un)' finished with warnings."
+		else
+			rs-logger info "Backup rotation for level '$1' of user '$(id -un)' finished."
+		fi
 	fi
 done

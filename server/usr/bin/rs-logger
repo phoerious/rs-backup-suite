@@ -37,10 +37,9 @@ if [ "$1" != "info" ] && [ "$1" != "warn" ] && [ "$1" != "err" ]; then
 fi
 
 distribution=$(rs-detect-distribution)
-
 if [[ "Synology" == "${distribution}" ]]; then
 	# Use Synology's crappy synologd if we're on DSM
-	synologset1 sys $1 0x99000001 "$2"
+	/usr/syno/bin/synologset1 sys $1 0x99000001 "[rs-backup-server] $2"
 else
 	# Any other distribution
 	command -v logger > /dev/null
@@ -48,12 +47,13 @@ else
 		logger -p $1 -t rs-backup-server "$2"
 	else
 		# Log to STDOUT/STDERR if we have no syslog facility
+		prefix="$(date) [rs-backup-server]"
 		if [ "$1" == "err" ]; then
-			echo "ERROR: $2" >&2
+			echo "$prefix ERROR: $2" >&2
 		elif [ "$1" == "warn" ]; then
-			echo "WARNING: $2" >&2
+			echo "$prefix WARNING: $2" >&2
 		else
-			echo "INFO: $2"
+			echo "$prefix INFO: $2"
 		fi
 	fi
 fi

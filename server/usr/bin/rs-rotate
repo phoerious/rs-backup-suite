@@ -36,7 +36,35 @@ if [ "$RSYNC_EXIT_STATUS" == "" ]; then
 	exit 1
 fi
 
+# rsync exit code descriptions found at
+# <https://lxadm.com/Rsync_exit_codes>
+msg="unknown code"
+case $RSYNC_EXIT_STATUS in
+	 0) msg="Success" ;;
+	 1) msg="Syntax or usage error" ;;
+	 2) msg="Protocol incompatibility" ;;
+	 3) msg="Errors selecting input/output files, dirs" ;;
+	 4) msg="Requested  action not supported: an attempt was made to manipulate 64-bit files on a platformi " \
+	        "that cannot support them; or an option was specified that is supported by the client and not by the server" ;;
+	 5) msg="Error starting client-server protocol" ;;
+	 6) msg="Daemon unable to append to log-file" ;;
+	10) msg="Error in socket I/O" ;;
+	11) msg="Error in file I/O" ;;
+	12) msg="Error in rsync protocol data stream" ;;
+	13) msg="Errors with program diagnostics" ;;
+	14) msg="Error in IPC code" ;;
+	20) msg="Received SIGUSR1 or SIGINT" ;;
+	21) msg="Some error returned by waitpid()" ;;
+	22) msg="Error allocating core memory buffers" ;;
+	23) msg="Partial transfer due to error" ;;
+	24) msg="Partial transfer due to vanished source files" ;;
+	25) msg="The --max-delete limit stopped deletions" ;;
+	30) msg="Timeout in data send/receive" ;;
+	35) msg="Timeout waiting for daemon connection" ;;
+esac
+
 if [ $RSYNC_EXIT_STATUS -eq 0 ] || [ $RSYNC_EXIT_STATUS -eq 24 ]; then
+	rs-logger info "Backup for user '$(id -un)' finished with exit code ${RSYNC_EXIT_STATUS} (${msg})"
     RSNAPSHOT="rsnapshot"
     if [ -x /usr/bin/rsnapshot ]; then
         RSNAPSHOT="/usr/bin/rsnapshot"
@@ -44,4 +72,14 @@ if [ $RSYNC_EXIT_STATUS -eq 0 ] || [ $RSYNC_EXIT_STATUS -eq 24 ]; then
         RSNAPSHOT="/opt/bin/rsnapshot"
     fi
     $RSNAPSHOT -c "$1" push
+	rsnapshot_exit_code=$?
+	if [ $rsnapshot_exit_code -eq 1 ]; then
+		rs-logger err "Backup rotation for level 'push' of user '$(id -un)' failed."
+	elif [ $rsnapshot_exit_code -eq 2 ]; then
+		rs-logger warn "Backup rotation for level 'push' of user '$(id -un)' finished with warnings."
+	else
+		rs-logger info "Backup rotation for level 'push' of user '$(id -un)' finished."
+	fi
+else
+	rs-logger err "Backup for user '$(id -un)' failed with exit code ${RSYNC_EXIT_STATUS} (${msg})"
 fi

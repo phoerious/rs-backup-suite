@@ -36,6 +36,7 @@ if $(echo "${SSH_ORIGINAL_COMMAND}" | grep -q "^\(internal-sftp\|.*/sftp-server\
     [ -x /usr/libexec/sftp-server ] && exec /usr/libexec/sftp-server -R
     [ -x /opt/libexec/sftp-server ] && exec /opt/libexec/sftp-server -R
 else
+	rs-logger info "Starting backup for user '$(id -un)'."
     RSYNC_OPTS="--server --daemon --config='$home_dir/rsync.conf' ."
     [ -x /usr/bin/rsync ] && exec /usr/bin/rsync $(eval echo $RSYNC_OPTS)
     [ -x /opt/bin/rsync ] && exec /opt/bin/rsync $(eval echo $RSYNC_OPTS)
