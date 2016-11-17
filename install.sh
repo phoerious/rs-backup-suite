@@ -180,8 +180,8 @@ if [[ $MODE == "install" ]]; then
 		else
 			# Update command paths if upgrading from earlier version
 			echo "Updating cp and rm command paths..."
-			sed -i "#/opt/bin/cp\$#/usr/bin/cp#" "$BKP_DIR"/etc/rsnapshot.global.conf
-			sed -i "#/opt/bin/rm\$#/usr/bin/rs-rm#" "$BKP_DIR"/etc/rsnapshot.global.conf
+			sed -i "s#/opt/bin/cp\$#/usr/bin/cp#" "$BKP_DIR"/etc/rsnapshot.global.conf
+			sed -i "s#/opt/bin/rm\$#/usr/bin/rs-rm#" "$BKP_DIR"/etc/rsnapshot.global.conf
 		fi
 
 		# Create symlink for chroot
