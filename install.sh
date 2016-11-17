@@ -143,7 +143,7 @@ if [[ $MODE == "install" ]]; then
 			$MKDIR "$BKP_DIR"/usr/share/perl5
 		fi
 
-		# Append fstab entries
+		# Apply distro-specific configurations
 		if [[ "$DISTRIBUTION" == "Synology" ]]; then
 				# Synology DSM restores default /etc/fstab upon reboot,
 				# so we better put mount commands in /etc/rc
@@ -155,6 +155,11 @@ if [[ $MODE == "install" ]]; then
 					echo "exit 0" >> $tmp_name
 					cat $tmp_name > /etc/rc
 					rm $tmp_name
+				fi
+
+				# Add our own syslog template
+				if ! grep -q "^# rs-backup-suite$" /usr/syno/synosdk/texts/enu/events; then
+					cat ./server/etc/events_synology >> /usr/syno/synosdk/texts/enu/events
 				fi
 		else
 			if ! grep -q "^# BEGIN: rs-backup-suite" /etc/fstab; then
