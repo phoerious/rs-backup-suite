@@ -157,7 +157,7 @@ write_log() {
                 log_dest=${HOME}/${_FALLBACK_USER_LOG_FILE}
             else
                 echo -e "\e[1mWARNING: Couldn't determine valid log file location, using '/var/tmp'...\e[0m" >&2
-                log_dest="/var/tmp/${LOG_FILE}"
+                log_dest="/var/tmp/$(basename ${LOG_FILE})"
             fi
 
             touch "${log_dest}" 2> /dev/null
