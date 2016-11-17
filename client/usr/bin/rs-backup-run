@@ -44,6 +44,8 @@ _VERSION=$(rs-version version)
 _GLOBAL_INCLUSION_PATTERN_FILE="/etc/rs-backup/include-files"
 _FORCED_INCLUSION_PATTERN_FILE=""
 _SKIP_HOME_DIRS=false
+_FALLBACK_LOG_FILE="/var/log/rs-backup.log"
+_FALLBACK_USER_LOG_FILE="rs-backup.user.log"
 _FORCED_LOG_FILE=""
 _QUIET_MODE=false
 _VERBOSE_MODE=false
@@ -101,7 +103,7 @@ Options:
                           performed, no additional home directories will be
                           backed up
  -l, --log-level=NUM      Set log level to NUM (between 0 and 4)
-     --log-file=FILE      Set a different log file location
+     --log-file=FILE      Log to this file instead of syslog
  -f, --force-run          Force rs-backup to run, even if a lock file exists
  -q, --quiet              Don't print any error messages or warnings to the
                           screen (only write to log file)
@@ -116,20 +118,19 @@ HELP
 # Usage: write_log <log level>  <log message>
 # 
 write_log() {
-    local log_msg
-    local log_date
+    local log_msg="${2}"
+    local log_date="[$(date)]"
     local log_dest
     local use_syslog=false
     local logger="logger -t $(basename $0)"
 
     command -v logger > /dev/null 2>&1
-    if [ $? -eq 0 ]; then
+    if [ $? -eq 0 ] && [ "${_FORCED_LOG_FILE}" == "" ]; then
         use_syslog=true
     fi
 
     if [ $1 -gt 0 ] && [ $1 -le $LOG_LEVEL ]; then
         if $use_syslog; then
-            log_msg="${2}"
             case $1 in
                 1) $logger -p err "${log_msg}" ;;
                 2) $logger -p warning "${log_msg}" ;;
@@ -147,23 +148,21 @@ write_log() {
         esac
 
         # if no syslog facility exists, go the cumbersome way...
-        if ! $use_syslog; then
-            log_date="[$(date)]"
-            full_log_msg="${log_date} ${log_msg}"
-            
+        if ! $use_syslog || [ "${_FORCED_LOG_FILE}" != "" ]; then
             if [ "${_FORCED_LOG_FILE}" != "" ]; then
                 log_dest=${_FORCED_LOG_FILE}
             elif [ $(id -u) -eq 0 ]; then
-                log_dest=${LOG_FILE}
-            elif [ "${HOME}" != "" ] && [ "${USER_LOG_FILE}" != "" ]; then
-                log_dest=${HOME}/${USER_LOG_FILE}
+                log_dest=${_FALLBACK_LOG_FILE}
+            elif [ "${HOME}" != "" ] && [ "${_FALLBACK_USER_LOG_FILE}" != "" ]; then
+                log_dest=${HOME}/${_FALLBACK_USER_LOG_FILE}
             else
-                echo "WARNING: Couldn't determine valid log file location, using '/var/tmp'..." >&2
+                echo -e "\e[1mWARNING: Couldn't determine valid log file location, using '/var/tmp'...\e[0m" >&2
                 log_dest="/var/tmp/${LOG_FILE}"
             fi
 
+            touch "${log_dest}" 2> /dev/null
             if ! test_file_perms "w" "${log_dest}"; then
-                echo "ERROR: Couldn't open log file for writing, redirecting to STDOUT!" >&2
+                echo -e "\e[1m\e[91mERROR: Couldn't open log file for writing, redirecting to STDOUT!\e[0m" >&2
                 echo "${log_date} ${log_msg}" >&1
             else
                 echo "${log_date} ${log_msg}" >> "${log_dest}"

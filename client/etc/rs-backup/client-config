@@ -27,17 +27,6 @@ REMOTE_USER="%h-%u"
 RSYNC_OPTIONS="--acls --hard-links --xattrs"
 #RSYNC_OPTIONS="--hard-links --xattrs"
 
-# Global log file to use when running as root
-LOG_FILE="/var/log/rs-backup.log"
-
-# Log filename (only basename) of the log file to use when running as a
-# normal user. The file will be placed inside the user's home directory.
-# Leave empty if you don't want any per-user log file.
-# The user log file will only be written when the user originally invoked
-# the script, not if his home directory is backed up during a full system
-# backup run by root
-USER_LOG_FILE="rs-backup.user.log"
-
 # Name of the file inside the users' home directories
 # containing the patterns for matching files to include or exclude.
 # The format is the same as the global 'include-files' config file
