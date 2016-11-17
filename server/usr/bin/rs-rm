@@ -3,7 +3,7 @@
 # Copyright (C) 2013-2016 Janek Bevendorff
 # Website: http://www.refining-linux.org/
 # 
-# Recursively adjust permissions of given directory and remove it.
+# Recursively adjust permissions of given file or directory and remove it.
 # 
 # The MIT License (MIT)
 #
@@ -28,17 +28,10 @@
 
 if [ "$1" == "" ]; then
 	. rs-version
-	echo "Usage: $(basename $0) <flags> <directory>"
+	echo "Usage: $(basename $0) [flags] <file>"
 	exit
 fi
 
-flags="$1"
-dir="$2"
-if [ "$2" == "" ]; then
-	dir="$1"
-	flags=""
-fi
-
-chmod -R +w "$dir"
-rm $flags "$dir"
+chmod -R +w "${@: -1}"
+rm ${@}
 
