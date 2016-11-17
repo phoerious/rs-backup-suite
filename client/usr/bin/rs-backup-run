@@ -140,10 +140,10 @@ write_log() {
 
         # prepend priority prefixes to message for further logging output
         case $1 in
-            1) log_msg="ERROR: ${2}" ;;
-            2) log_msg="WARNING: ${2}" ;;
-            3) log_msg="INFO: ${2}" ;;
-            *) log_msg="DEBUG: ${2}" ;;
+            1) log_msg="ERROR: ${log_msg}" ;;
+            2) log_msg="WARNING: ${log_msg}" ;;
+            3) log_msg="INFO: ${log_msg}" ;;
+            *) log_msg="DEBUG: ${log_msg}" ;;
         esac
 
         # if no syslog facility exists, go the cumbersome way...
@@ -172,9 +172,9 @@ write_log() {
 
         # after logging stuff, print it to the screen if we're not in quiet mode
         if ! $_QUIET_MODE && [ $1 -eq 1 ]; then
-            $_VERBOSE_MODE || $PRINT_ERRORS && echo "${log_msg}" >&2
+            $_VERBOSE_MODE || $PRINT_ERRORS && echo -e "\e[1m\e[91m${log_msg}\e[0m" >&2
         elif ! $_QUIET_MODE && [ $1 -le 2 ]; then
-            $_VERBOSE_MODE || $PRINT_WARNINGS && echo "${log_msg}" >&2
+            $_VERBOSE_MODE || $PRINT_WARNINGS && echo -e "\e[1m${log_msg}\e[0m" >&2
         elif ! $_QUIET_MODE && [ $1 -gt 2 ]; then
             $_VERBOSE_MODE && echo "${log_msg}" >&1
         fi
