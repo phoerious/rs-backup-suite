@@ -241,7 +241,7 @@ desktop_notify() {
             urgency="normal"
             ;;
         "SUCCESS")
-            icon="task-complete.png"
+            icon="dialog-ok.png"
             urgency="low"
             ;;
         *)

@@ -175,7 +175,7 @@ if [[ $MODE == "install" ]]; then
 			$CP ./server/bkp/etc/* "$BKP_DIR"/etc/
 			# Correct command paths in rsnapshot config for Synology DSM
 			if [[ "$DISTRIBUTION" == "Synology" ]]; then
-				sed -i "s#/usr/bin/\(cp\|rm\|rsync\|logger\)\$#/opt/bin/\1#" "$BKP_DIR"/etc/rsnapshot.global.conf
+				sed -i "s#/usr/bin/\(rsync\|logger\)\$#/opt/bin/\1#" "$BKP_DIR"/etc/rsnapshot.global.conf
 			fi
 		fi
 
