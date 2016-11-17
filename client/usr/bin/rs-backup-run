@@ -119,8 +119,26 @@ write_log() {
     local log_msg
     local log_date
     local log_dest
+    local use_syslog=false
+    local logger="logger -t $(basename $0)"
+
+    command -v logger > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        use_syslog=true
+    fi
 
     if [ $1 -gt 0 ] && [ $1 -le $LOG_LEVEL ]; then
+        if $use_syslog; then
+            log_msg="${2}"
+            case $1 in
+                1) $logger -p err "${log_msg}" ;;
+                2) $logger -p warning "${log_msg}" ;;
+                3) $logger -p info "${log_msg}" ;;
+                *) $logger -p debug "${log_msg}" ;;
+            esac
+        fi
+
+        # prepend priority prefixes to message for further logging output
         case $1 in
             1) log_msg="ERROR: ${2}" ;;
             2) log_msg="WARNING: ${2}" ;;
@@ -128,27 +146,31 @@ write_log() {
             *) log_msg="DEBUG: ${2}" ;;
         esac
 
-        log_date="[$(date)]"
-        full_log_msg="${log_date} ${log_msg}"
-        
-        if [ "${_FORCED_LOG_FILE}" != "" ]; then
-            log_dest=${_FORCED_LOG_FILE}
-        elif [ $(id -u) -eq 0 ]; then
-            log_dest=${LOG_FILE}
-        elif [ "${HOME}" != "" ] && [ "${USER_LOG_FILE}" != "" ]; then
-            log_dest=${HOME}/${USER_LOG_FILE}
-        else
-            echo "WARNING: Couldn't determine valid log file location, using '/var/tmp'..." >&2
-            log_dest="/var/tmp/${LOG_FILE}"
+        # if no syslog facility exists, go the cumbersome way...
+        if ! $use_syslog; then
+            log_date="[$(date)]"
+            full_log_msg="${log_date} ${log_msg}"
+            
+            if [ "${_FORCED_LOG_FILE}" != "" ]; then
+                log_dest=${_FORCED_LOG_FILE}
+            elif [ $(id -u) -eq 0 ]; then
+                log_dest=${LOG_FILE}
+            elif [ "${HOME}" != "" ] && [ "${USER_LOG_FILE}" != "" ]; then
+                log_dest=${HOME}/${USER_LOG_FILE}
+            else
+                echo "WARNING: Couldn't determine valid log file location, using '/var/tmp'..." >&2
+                log_dest="/var/tmp/${LOG_FILE}"
+            fi
+
+            if ! test_file_perms "w" "${log_dest}"; then
+                echo "ERROR: Couldn't open log file for writing, redirecting to STDOUT!" >&2
+                echo "${log_date} ${log_msg}" >&1
+            else
+                echo "${log_date} ${log_msg}" >> "${log_dest}"
+            fi
         fi
 
-        if ! test_file_perms "w" "${log_dest}"; then
-            echo "ERROR: Couldn't open log file for writing, redirecting to STDOUT!" >&2
-            echo "${log_date} ${log_msg}" >&1
-        else
-            echo "${log_date} ${log_msg}" >> "${log_dest}"
-        fi
-
+        # after logging stuff, print it to the screen if we're not in quiet mode
         if ! $_QUIET_MODE && [ $1 -eq 1 ]; then
             $_VERBOSE_MODE || $PRINT_ERRORS && echo "${log_msg}" >&2
         elif ! $_QUIET_MODE && [ $1 -le 2 ]; then
