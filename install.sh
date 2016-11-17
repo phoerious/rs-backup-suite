@@ -177,6 +177,10 @@ if [[ $MODE == "install" ]]; then
 			if [[ "$DISTRIBUTION" == "Synology" ]]; then
 				sed -i "s#/usr/bin/\(rsync\|logger\)\$#/opt/bin/\1#" "$BKP_DIR"/etc/rsnapshot.global.conf
 			fi
+		else
+			# Update command paths if upgrading from earlier version
+			sed -i "#/opt/bin/cp\$#/usr/bin/cp#" "$BKP_DIR"/etc/rsnapshot.global.conf
+			sed -i "#/opt/bin/rm\$#/usr/bin/rs-rm#" "$BKP_DIR"/etc/rsnapshot.global.conf
 		fi
 
 		# Create symlink for chroot
