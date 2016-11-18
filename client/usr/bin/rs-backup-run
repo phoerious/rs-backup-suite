@@ -52,6 +52,12 @@ _VERBOSE_MODE=false
 _SHOW_PROGRESS=false
 _DRY_RUN=false
 _FORCE_RUN=false
+_PRE_HOOK=""
+_PRE_HOOK_RUN=false
+_POST_HOOK=""
+_POST_HOOK_RUN=false
+_FORCED_POST_HOOK=""
+_FORCED_POST_HOOK_RUN=false
 _ERROR_COUNT=0
 
 if [ $(id -u) -eq 0 ]; then
@@ -85,31 +91,43 @@ user will be backed up.
 Usage: $(basename $0) [OPTION]...
 
 Options:
- -r, --remote-host=HOST   The remote host to connect to
-     --remote-user=NAME   The username to use for logging into the remote server
-                          (%h will be replaced with the host name of  this
-                          machine and %u with your username)
-     --push-module=NAME   The remote rsync server module
-     --ssh-options=OPTS   Additional SSH options (will be merged with the default
-                          options set in the rs-backup client-config file)
- -o, --rsync-options=OPTS Additional options for rsync
- -n, --dry-run            Perform a test run (same as the --dry-run option for
-                          rsync). Enable --verbose mode for useful control output
- -s, --no-home-dirs       Don't back up home dirs, only perform global system
-                          backup (root only)
- -i, --include-from=FILE  Specify an alternate inclusion pattern file
-                          This will override the default setting. If the script
-                          is run as root, only the system backup will be
-                          performed, no additional home directories will be
-                          backed up
- -l, --log-level=NUM      Set log level to NUM (between 0 and 4)
-     --log-file=FILE      Log to this file instead of syslog
- -f, --force-run          Force rs-backup to run, even if a lock file exists
- -q, --quiet              Don't print any error messages or warnings to the
-                          screen (only write to log file)
- -v, --verbose            Print all messages of the current debug level
- -p, --progress           Print file transfer information to the terminal
- -h, --help               Print this help and exit
+ -r, --remote-host=HOST     The remote host to connect to
+     --remote-user=NAME     The username to use for logging into the remote server
+                            (%h will be replaced with the host name of  this
+                            machine and %u with your username)
+     --push-module=NAME     The remote rsync server module
+     --ssh-options=OPTS     Additional SSH options (will be merged with the default
+                            options set in the rs-backup client-config file)
+ -o, --rsync-options=OPTS   Additional options for rsync
+ -n, --dry-run              Perform a test run (same as the --dry-run option for
+                            rsync). Enable --verbose mode for useful control output
+ -s, --no-home-dirs         Don't back up home dirs, only perform global system
+                            backup (root only)
+ -i, --include-from=FILE    Specify an alternate inclusion pattern file
+                            This will override the default setting. If the script
+                            is run as root, only the system backup will be
+                            performed, no additional home directories will be
+                            backed up
+ -l, --log-level=NUM        Set log level to NUM (between 0 and 4)
+     --log-file=FILE        Log to this file instead of syslog
+ -f, --force-run            Force rs-backup to run, even if a lock file exists
+ -q, --quiet                Don't print any error messages or warnings to the
+                            screen (only write to log file)
+ -v, --verbose              Print all messages of the current debug level
+ -p, --progress             Print file transfer information to the terminal
+     --pre-hook=CMD         Command to be run before the backup. Will only be run
+                            once for multi-user / global system backup. The hook
+                            command will be executed as the user who started the
+                            backup command
+     --post-hook=CMD        Similar to --pre-hook, but run after the backup
+                            has successfully finished. If an error occurred
+                            during the backup, the post hook will not be run.
+     --forced-post-hook=CMD Same as --post-hook, but will always be run, regardless
+                            of wether an error occurred or not. Will also be run
+                            if the backup was interrupted by SIGINT or SIGTERM.
+                            If both --post-hook and --forced-post-hook are specified,
+                            --post-hook is run first
+ -h, --help                 Print this help and exit
 HELP
 }
 
@@ -211,14 +229,57 @@ remove_runfile() {
     rmdir "$(dirname $_RUNFILE)" > /dev/null 2>&1
 }
 
+# Run the user-specified pre hook
+# 
+# Usage: run_pre_hook
+#
+run_pre_hook() {
+    if ! $_PRE_HOOK_RUN && [ "" != "$_PRE_HOOK" ]; then
+        $SHELL -c "$_PRE_HOOK"
+        _PRE_HOOK_RUN=true
+    fi
+}
+
+# Run the user-specified post hook
+# 
+# Usage: run_post_hook
+#
+run_post_hook() {
+    if ! $_POST_HOOK_RUN && [ "" != "$_POST_HOOK" ]; then
+        $SHELL -c "$_POST_HOOK"
+        _POST_HOOK_RUN=true
+    fi
+}
+
+# Run the user-specified forced post hook
+# 
+# Usage: run_forced_post_hook
+#
+run_forced_post_hook() {
+    if ! $_FORCED_POST_HOOK_RUN && [ "" != "$_FORCED_POST_HOOK" ]; then
+        $SHELL -c "$_FORCED_POST_HOOK"
+        _FORCED_POST_HOOK_RUN=true
+    fi
+}
+
+# Exit cleanly with given exit code.
+# Removes any run files and runs the forced post hook.
+#
+# Usage clean_exit <exit_code>
+#
+clean_exit() {
+    remove_runfile
+    run_forced_post_hook
+    exit $@
+}
+
 # Handle script termination by external signals.
 #
 # Usage: handle_signals
 #
 handle_exit_signal() {
     write_log 1 "Program terminated upon user request."
-    remove_runfile
-    exit 1
+    clean_exit 1
 }
 
 # Show a desktop notification using notify-send
@@ -526,16 +587,15 @@ parse_cmd_args() {
     getopt -T > /dev/null
     if [ $? -ne 4 ]; then
         write_log 1 "Need GNU getopt for command line parameter parsing!"
-        exit 1;
+        exit 1
     fi
     
-    args=$(getopt \
-        -s sh \
-        -o "r:o:nsi:l:fqvph" \
-        -l "remote-host:,remote-user:,push-module:,ssh-options:,rsync-options:,dry-run,no-home-dirs,include-from:,log-level:,log-file:,force-run,quiet,verbose,progress,help" \
-        -n "${name}" \
-        -- "${@}")
+    short_opts="r:o:nsi:l:fqvph"
+    long_opts="remote-host:,remote-user:,push-module:,ssh-options:,rsync-options:,"
+    long_opts+="dry-run,no-home-dirs,include-from:,log-level:,log-file:,force-run"
+    long_opts+="quiet,verbose,progress,pre-hook:,post-hook:,forced-post-hook:,help"
 
+    args=$(getopt -s sh -o "$short_opts" -l "$long_opts" -n "${name}" -- "${@}")
     if [ $? -ne 0 ]; then
         exit 1
     fi
@@ -567,17 +627,17 @@ parse_cmd_args() {
                 shift ;;
             "-i"|"--include-from")
                 # File must exist and be readable
-                ! test_file_perms "r" "${2}" && echo "$name: '${2}' does not exist or is not readable!" >&2 && exit 1
+                ! test_file_perms "r" "${2}" && echo "$name: '${2}' does not exist or is not readable!" >&2 && exit 1 
                 _FORCED_INCLUSION_PATTERN_FILE=$2
                 _SKIP_HOME_DIRS=true
                 shift 2 ;;
             "-l"|"--log-level")
-                LOG_LEVEL=$2;
+                LOG_LEVEL="$2"
                 shift 2 ;;
             "--log-file")
                 # Test if file is writeable
                 ! test_file_perms "w" "${2}" && echo "$name: '${2}' is not writeable!" >&2 && exit 1
-                _FORCED_LOG_FILE=$2
+                _FORCED_LOG_FILE="$2"
                 shift 2 ;;
             "-f"|"--force-run")
                 _FORCE_RUN=true
@@ -591,6 +651,15 @@ parse_cmd_args() {
             "-p"|"--progress")
                 ! $_QUIET_MODE && _SHOW_PROGRESS=true
                 shift ;;
+            "--pre-hook")
+                _PRE_HOOK="$2"
+                shift 2 ;;
+            "--post-hook")
+                _POST_HOOK="$2"
+                shift 2 ;;
+            "--forced-post-hook")
+                _FORCED_POST_HOOK="$2"
+                shift 2 ;;
             "-h"|"--help")
                 print_help
                 exit ;;
@@ -625,6 +694,7 @@ elif $_FORCE_RUN; then
     write_log 4 "Backup already running as PID $(<$_RUNFILE), forcing parallel backup..."
 fi
 
+run_pre_hook
 create_runfile
 
 # Backup exit code (0 if all backups have finished successfully)
@@ -663,5 +733,8 @@ remove_runfile
 write_log 4 "Done."
 
 if [ $_ERROR_COUNT -gt 0 ]; then
-    exit 1
+    clean_exit 1
 fi
+
+run_post_hook
+run_forced_post_hook
