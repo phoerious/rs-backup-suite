@@ -24,6 +24,14 @@ REMOTE_USER="%h-%u"
 #SSH_OPTIONS="-C -i .ssh/id_rsa"
 
 # Additional options for rsync
+#
+# For systems that don't support it (e.g. Synology DSM), you may
+# need to remove the --acls option
+#
+# The block size setting should avoid hangs when backing up larger
+# files. It's set to the default maximum value allowed by rsync.
+# If you need larger values, recompile rsync with MAX_BLOCK_SIZE
+# set to an appropriate value.
 RSYNC_OPTIONS="--acls --hard-links --xattrs --block-size=131072"
 #RSYNC_OPTIONS="--hard-links --xattrs"
 
