@@ -24,7 +24,7 @@ REMOTE_USER="%h-%u"
 #SSH_OPTIONS="-C -i .ssh/id_rsa"
 
 # Additional options for rsync
-RSYNC_OPTIONS="--acls --hard-links --xattrs"
+RSYNC_OPTIONS="--acls --hard-links --xattrs --block-size=131072"
 #RSYNC_OPTIONS="--hard-links --xattrs"
 
 # Name of the file inside the users' home directories
