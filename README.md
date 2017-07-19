@@ -181,7 +181,7 @@ Because rs-backup-suite uses rsync for the client-server communication you don't
 rs-backup-suite is designed to work on most generic Linux systems, but some embedded systems may require some extra love (especially those running on busybox):
 
 ### Synology DSM
-To run the server component on Synology DSM, you need to install the following packages via [ipkg](http://www.synology-wiki.de/index.php/IPKG):
+To run the server component on Synology DSM, you need to install the following packages via [Entware-ng / opkg](https://github.com/Entware-ng/Entware-ng/wiki/Install-on-Synology-NAS):
 
 * `rsnapshot`
 * `openssh-sftp-server`
