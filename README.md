@@ -186,6 +186,7 @@ To run the server component on Synology DSM, you need to install the following p
 * `rsnapshot`
 * `openssh-sftp-server`
 * `util-linux-ng`
+* `logger`
 
 In `/etc/ssh/sshd_config` make sure you replace whatever line contains the subsystem configuration for the sftp server with
 
