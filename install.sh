@@ -148,8 +148,8 @@ if [[ $MODE == "install" ]]; then
 				# Synology DSM restores default /etc/fstab upon reboot,
 				# so we better put mount commands in /usr/local/etc/rc.d
 				if [ ! -f /usr/local/etc/rc.d/10-rs-backup-suite.sh ]; then
-					cp ./server/etc/fstab_synology /usr/local/etc/rc.d/10-rs-backup-suite.sh
-					chmod +x /usr/local/etc/rc.d/10-rs-backup-suite.sh
+					$CP ./server/etc/synology_rc /usr/local/etc/rc.d/10-rs-backup-suite.sh
+					chmod 755 /usr/local/etc/rc.d/10-rs-backup-suite.sh
 				fi
 
 				# Add our own syslog template

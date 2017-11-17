@@ -196,22 +196,28 @@ and restart the SSH server using the configuration utility from the web interace
 
 If you want to run your backups in a chroot environment please note that `/etc/fstab` will be reset to its defaults when rebooting the disk station. To avoid configuration loss, no mount directives are added to `/etc/fstab`  by the install script. Instead the following entries are added to `/usr/local/etc/rc.d/10-rs-backup-suite.sh` (which won't be overwritten upon reboot or when performing an upgrade).
 
-    #mount -o bind            /bin                        /var/services/homes/bin
-    #mount -o remount,ro,bind /var/services/homes/bin
-    #mount -o bind            /lib                        /var/services/homes/lib
-    #mount -o remount,ro,bind /var/services/homes/lib
-    #mount -o bind            /dev                        /var/services/homes/dev
-    #mount -o remount,ro,bind /var/services/homes/dev
-    #mount -o bind            /usr/bin                    /var/services/homes/usr/bin
-    #mount -o remount,ro,bind /var/services/homes/usr/bin
-    #mount -o bind            /opt/bin                    /var/services/homes/opt/bin
-    #mount -o remount,ro,bind /var/services/homes/opt/bin
-    #mount -o bind            /opt/lib                    /var/services/homes/opt/lib
-    #mount -o remount,ro,bind /var/services/homes/opt/lib
-    #mount -o bind            /opt/libexec                /var/services/homes/opt/libexec
-    #mount -o remount,ro,bind /var/services/homes/opt/libexec
+    mounts() {
+        mount -o bind            /bin                        ::BACKUP_ROOT::/bin
+        mount -o remount,ro,bind ::BACKUP_ROOT::/bin
+        mount -o bind            /lib                        ::BACKUP_ROOT::/lib
+        mount -o remount,ro,bind ::BACKUP_ROOT::/lib
+        mount -o bind            /dev                        ::BACKUP_ROOT::/dev
+        mount -o remount,ro,bind ::BACKUP_ROOT::/dev
+        mount -o bind            /usr/bin                    ::BACKUP_ROOT::/usr/bin
+        mount -o remount,ro,bind ::BACKUP_ROOT::/usr/bin
+        mount -o bind            /opt/bin                    ::BACKUP_ROOT::/opt/bin
+        mount -o remount,ro,bind ::BACKUP_ROOT::/opt/bin
+        mount -o bind            /opt/lib                    ::BACKUP_ROOT::/opt/lib
+        mount -o remount,ro,bind ::BACKUP_ROOT::/opt/lib
+        mount -o bind            /opt/libexec                ::BACKUP_ROOT::/opt/libexec
+        mount -o remount,ro,bind ::BACKUP_ROOT::/opt/libexec
+    }
 
-To enable the mounts, uncomment everything between the `BEGIN` and `END` block. Afterwards either run these commands by hand once or reboot. Of course, don't forget to also set the correct chroot path in `/etc/ssh/sshd_config` and restart the SSH daemon:
+    if [ "$1" == "start" ]; then
+    	#mounts
+    fi
+
+To enable the mounts, uncomment the `mounts` call between `if` and `fi`. Afterwards either run the script by hand once or reboot. Of course, don't forget to also set the correct chroot path in `/etc/ssh/sshd_config` and restart the SSH daemon:
     
     Match Group backup 
         ChrootDirectory /var/services/homes/
