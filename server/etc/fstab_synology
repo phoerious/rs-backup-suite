@@ -1,4 +1,3 @@
-# BEGIN: rs-backup-suite
 #mount -o bind            /bin                        ::BACKUP_ROOT::/bin
 #mount -o remount,ro,bind ::BACKUP_ROOT::/bin
 #mount -o bind            /lib                        ::BACKUP_ROOT::/lib
@@ -13,4 +12,3 @@
 #mount -o remount,ro,bind ::BACKUP_ROOT::/opt/lib
 #mount -o bind            /opt/libexec                ::BACKUP_ROOT::/opt/libexec
 #mount -o remount,ro,bind ::BACKUP_ROOT::/opt/libexec
-# END: rs-backup-suite

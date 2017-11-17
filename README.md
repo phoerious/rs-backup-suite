@@ -194,9 +194,8 @@ In `/etc/ssh/sshd_config` make sure you replace whatever line contains the subsy
 
 and restart the SSH server using the configuration utility from the web interace. If you are using the `synoservicectl` utility from the command line instead, make sure you are actually starting the correct SSH server from `/usr/sbin` and not from `/opt/sbin` (although that works as well, but would have a different configuration file).
 
-If you want to run your backups in a chroot environment please note that `/etc/fstab` will be reset to its defaults when rebooting the disk station. To avoid configuration loss, no mount directives are added to `/etc/fstab`  by the install script. Instead the following entries are added to `/etc/rc` (which won't be overwritten upon reboot):
+If you want to run your backups in a chroot environment please note that `/etc/fstab` will be reset to its defaults when rebooting the disk station. To avoid configuration loss, no mount directives are added to `/etc/fstab`  by the install script. Instead the following entries are added to `/usr/local/etc/rc.d/10-rs-backup-suite.sh` (which won't be overwritten upon reboot or when performing an upgrade).
 
-    # BEGIN: rs-backup-suite
     #mount -o bind            /bin                        /var/services/homes/bin
     #mount -o remount,ro,bind /var/services/homes/bin
     #mount -o bind            /lib                        /var/services/homes/lib
@@ -211,7 +210,6 @@ If you want to run your backups in a chroot environment please note that `/etc/f
     #mount -o remount,ro,bind /var/services/homes/opt/lib
     #mount -o bind            /opt/libexec                /var/services/homes/opt/libexec
     #mount -o remount,ro,bind /var/services/homes/opt/libexec
-    # END: rs-backup-suite
 
 To enable the mounts, uncomment everything between the `BEGIN` and `END` block. Afterwards either run these commands by hand once or reboot. Of course, don't forget to also set the correct chroot path in `/etc/ssh/sshd_config` and restart the SSH daemon:
     

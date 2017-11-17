@@ -146,15 +146,10 @@ if [[ $MODE == "install" ]]; then
 		# Apply distro-specific configurations
 		if [[ "$DISTRIBUTION" == "Synology" ]]; then
 				# Synology DSM restores default /etc/fstab upon reboot,
-				# so we better put mount commands in /etc/rc
-				if ! grep -q "^# BEGIN: rs-backup-suite" /etc/rc; then
-					tmp_name="/tmp/rs-backup_etc-rc.$RANDOM"
-					fstab_contents="$(cat ./server/etc/fstab_synology | sed "s#::BACKUP_ROOT::#$BKP_DIR#")"
-					tac /etc/rc | sed -e '1!b' -e '/^exit 0$/d' | tac > $tmp_name
-					echo "$fstab_contents" >> $tmp_name
-					echo "exit 0" >> $tmp_name
-					cat $tmp_name > /etc/rc
-					rm $tmp_name
+				# so we better put mount commands in /usr/local/etc/rc.d
+				if [ ! -f /usr/local/etc/rc.d/10-rs-backup-suite.sh ]; then
+					cp ./server/etc/fstab_synology /usr/local/etc/rc.d/10-rs-backup-suite.sh
+					chmod +x /usr/local/etc/rc.d/10-rs-backup-suite.sh
 				fi
 
 				# Add our own syslog template
