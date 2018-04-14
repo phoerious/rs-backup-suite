@@ -149,6 +149,7 @@ if [[ $MODE == "install" ]]; then
 				# so we better put mount commands in /usr/local/etc/rc.d
 				if [ ! -f /usr/local/etc/rc.d/10-rs-backup-suite.sh ]; then
 					$CP ./server/etc/synology_rc /usr/local/etc/rc.d/10-rs-backup-suite.sh
+					sed -i "s#::BACKUP_ROOT::#$BKP_DIR#" /usr/local/etc/rc.d/10-rs-backup-suite.sh
 					chmod 755 /usr/local/etc/rc.d/10-rs-backup-suite.sh
 				fi
 
