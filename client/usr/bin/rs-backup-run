@@ -30,9 +30,24 @@
 
 
 ###############################################################################
-# Source configs
+# Define config defaults
 ###############################################################################
 
+REMOTE_HOST="localhost"
+PUSH_MODULE="push"
+DISABLE_GLOBAL_BACKUP=false
+REMOTE_USER="%h-%u"
+SSH_OPTIONS=""
+RSYNC_OPTIONS=""
+INCLUSION_PATTERN_FILE=".rs-backup/include"
+LOG_LEVEL=3
+PRINT_ERRORS=true
+PRINT_WARNINGS=true
+DESKTOP_NOTIFICATIONS=true
+
+###############################################################################
+# Source configs
+###############################################################################
 . /etc/rs-backup/client-config
 
 
@@ -84,6 +99,7 @@ Push backup to rsync backup server over SSH.
 If run as root and with no parameters, a full backup of all files and folders
 specified in '${_GLOBAL_INCLUSION_PATTERN_FILE}' and all home directories
 containing a proper backup config file will be pushed.
+Global backups can be disabled via the configuration.
 
 If invoked without root privileges, only the home directory of the current
 user will be backed up.
@@ -359,13 +375,13 @@ test_file_perms() {
     return $?    
 }
 
-# Generate and return remote user name for SSH login
+# Replace username and hostname placeholders in a string
 # 
-# Usage: get_remote_username [<local username>] [<local hostname>]
+# Usage: replace_placeholders <src_string> [<local username>] [<local hostname>]
 # 
-get_remote_username() {
-    local username=$1
-    local hostname=$2
+replace_placeholders() {
+    local username=$2
+    local hostname=$3
 
     if [ "${username}" == "" ]; then
         username=$(id -un)
@@ -375,7 +391,7 @@ get_remote_username() {
         hostname=$(hostname)
     fi
 
-    echo $(echo ${REMOTE_USER} | sed "s/%h/${hostname}/" | sed "s/%u/${username}/")
+    echo $(echo ${1} | sed "s/%h/${hostname}/" | sed "s/%u/${username}/")
 }
 
 # Get a stripped down version of the /etc/passwd file with all non-system users,
@@ -520,7 +536,8 @@ back_up_system() {
     else
         write_log 3 "Starting global system backup..."
     fi
-    perform_backup "${_GLOBAL_INCLUSION_PATTERN_FILE}" "$(get_remote_username root)@${REMOTE_HOST}::${PUSH_MODULE}"
+    perform_backup "${_GLOBAL_INCLUSION_PATTERN_FILE}" \
+        "$(replace_placeholders "${REMOTE_USER}" root)@${REMOTE_HOST}::$(replace_placeholders ${PUSH_MODULE} root)"
     return $?
 }
 
@@ -552,7 +569,8 @@ back_up_single_home_dir() {
     else
         write_log 3 "Starting backup of '${home_dir}'..."
     fi
-    perform_backup "${home_dir}/${INCLUSION_PATTERN_FILE}" "$(get_remote_username ${username})@${REMOTE_HOST}::${PUSH_MODULE}" "${username}"
+    perform_backup "${home_dir}/${INCLUSION_PATTERN_FILE}" \
+        "$(replace_placeholders "${REMOTE_USER}" "${username}")@${REMOTE_HOST}::$(replace_placeholders "${PUSH_MODULE}" "${username}")" "${username}"
     return $?
 }
 
@@ -701,12 +719,12 @@ create_runfile
 _exit_code=$?
 
 # Check if script has been invoked as root
-if [ $(id -u) -eq 0 ]; then
+if [ $(id -u) -eq 0 ] && ! ${DISABLE_GLOBAL_BACKUP}; then
     write_log 4 "Running as root, performing global system backup..."
     desktop_notify "INFO" "Full system backup" "rs-backup is starting a full system backup..."
     back_up_system
     _exit_code=$(($_exit_code | $?))
-
+elif [ $(id -u) -eq 0 ]; then
     if ! $_SKIP_HOME_DIRS; then
         back_up_home_dirs
         _exit_code=$(($_exit_code | $?))

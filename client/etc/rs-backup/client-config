@@ -8,10 +8,18 @@
 # Remote host to push the files to
 # The remote host must have a working rsync server running which allows
 # passwordless (public key) login over SSH
-REMOTE_HOST="host"
+REMOTE_HOST="localhost"
 
 # The rsync module on the remote server 
+# You can use the variables %h which will be replaced with the hostname
+# of this machine and %u which will be replaced with your local username.
+# If a global system backup is performed, %u will be 'root' for the global
+# backup and the corresponding user for the individual home directories
 PUSH_MODULE="push"
+
+# Disable the global backup. Running rs-backup-run as root
+# will only backup all configured home directories.
+DISABLE_GLOBAL_BACKUP=true
 
 # Username to use for logging into the remote server.
 # You can use the variables %h which will be replaced with the hostname
