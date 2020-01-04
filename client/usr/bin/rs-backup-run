@@ -430,6 +430,17 @@ get_processed_passwd_file() {
     done
 }
 
+# Workaround for Microsoft WSL bug causing rsync to hang
+# See: https://github.com/microsoft/WSL/issues/2138
+keep_wsl_ssh_alive() {
+    sleep 5
+    local pid=$$
+    local pscmd="ps -o pid,cmd -g $(ps -o sid= -p $pid)"
+    while kill -CHLD $($pscmd | grep -oE "^ *[0-9]+ ssh" | grep -oE "[0-9]+") > /dev/null 2>&1; do
+        sleep 0.1
+    done
+}
+
 # Back up a directory.
 # The third parameter is optional and specifys the user under whose
 # privileges the backup will be performed
@@ -496,6 +507,10 @@ perform_backup() {
     write_log 4 "This is the command about to be run: $(echo ${backup_cmd})"
 
     set -o pipefail
+
+    if uname -r | grep -q "Microsoft"; then
+        keep_wsl_ssh_alive &
+    fi
 
     if [ $(id -u) -eq 0 ] && [ "${username}" != "$(id -un)" ]; then
         write_log 4 "Running backup with privileges of user '${username}' (UID: $(id -u ${username}))..."
