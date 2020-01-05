@@ -7,7 +7,7 @@ rs-backup-suite is designed for push backups, which means the client pushes its 
 
 It is also a user-centric backup system. That means each user creates his own backup on the NAS instead of root backing up the whole machine at once (although this is possible). That also means that each user has a UNIX account on the NAS. The NAS username is usually `<hostname>-<local user name>` (e.g. `mymachine-johndoe`).
 
-On the client machine(s) each user can create a file called `.rs-backup/include` (name is configurable) inside his home directory which includes the list of files that should be considered by the backup. Additionally root can maintain a similar file located at `/etc/rs-backup/include-files` for the system files.
+On the client machine(s) each user can create a file called `.rs-backup/include-files` (name is configurable) inside his home directory which includes the list of files that should be considered by the backup. Additionally root can maintain a similar file located at `/etc/rs-backup/include-files` for the system files.
 
 ## Setup (please read this carefully before performing any actions!)
 rs-backup-suite is split into two parts: a client part for pushing the backup to the NAS and a server part which runs on the NAS itself.
@@ -28,6 +28,7 @@ If you need to tweak the server settings, simply edit `/etc/rs-backup/server-con
 * `FILES_DIR`: The directory under which the actual backups are kept (relative to the backup user's home directory). The default is `files`.
 * `SET_QUOTA`: Whether to set disk quota for the users or not (for Ext3/4 file systems). Default is `false`.
 * `QUOTA_SOFT_LIMIT`, `QUOTA_HARD_LIMIT`, `QUOTA_INODE_SOFT_LIMIT`, `QUOTA_INODE_HARD_LIMIT`: The individual limits for disk quota. Ignored, if `SET_QUOTA` is `false`.
+* `CONFIG_PREFIX`: user-relative configuration directory prefix (default: `.rs-backup`)
 
 **WARNING:** Adjust these settings *before* you create backup users, because they won't be re-applied for already existing users!
 
@@ -111,8 +112,8 @@ on your client machine. Then open the file `/etc/rs-backup/client-config` as roo
 
 On the client machines the script `/usr/bin/rs-backup-run` is used for performing the backups. This script can either be run as root or as an unprivileged user. The behavior differs in both cases:
 
-* If run as root, all files and folder specified in `/etc/rs-backup/include-files` will be backed up. The backup user used for logging into the NAS is `hostname-root` by default (where `hostname` is the hostname of the current machine). Additionally the home directories of all users will be scanned. If a home directory contains a file called `.rs-backup/include` all files and folders specified inside that file will be backed up under this user's privileges. The username used for logging into the NAS is `hostname-username` (where `hostname` is again substituted for the hostname of the current machine and `username` for the user whose home directory is being backed up).
-* If run as a normal user, only the files that are specified in your own `.rs-backup/include` will be backed up.
+* If run as root, all files and folder specified in `/etc/rs-backup/include-files` will be backed up. The backup user used for logging into the NAS is `hostname-root` by default (where `hostname` is the hostname of the current machine). Additionally the home directories of all users will be scanned. If a home directory contains a file called `.rs-backup/include-files` all files and folders specified inside that file will be backed up under this user's privileges. The username used for logging into the NAS is `hostname-username` (where `hostname` is again substituted for the hostname of the current machine and `username` for the user whose home directory is being backed up).
+* If run as a normal user, only the files that are specified in your own `.rs-backup/include-files` will be backed up.
 
 #### Changing the default configuration
 All the client configuration options are defined in `/etc/rs-backup/client-config`. You can edit the file as you wish. All parameters are documented clearly by comments. Most of these configuration options can also be overridden at runtime by passing command line arguments to `rs-backup-run`. For a list and a description of all possible command line arguments run
@@ -151,7 +152,7 @@ You can also start a full system backup manually at any time by running
     systemctl start rs-backup-run.service
 
 ### Inclusion patterns
-After everything is set up that way you create the file `/etc/rs-backup/include-file` and write to it a list of files and folders you want to back up as root (e.g. you can specify `/etc/***` to backup the whole `/etc` directory and all its subdirectories). Furthermore each user creates a file called `.rs-backup/include` inside his home directory that serves the same purpose for his own home directory instead of the global system. Such a file could look like this:
+After everything is set up that way you create the file `/etc/rs-backup/include-file` and write to it a list of files and folders you want to back up as root (e.g. you can specify `/etc/***` to backup the whole `/etc` directory and all its subdirectories). Furthermore each user creates a file called `.rs-backup/include-files` inside his home directory that serves the same purpose for his own home directory instead of the global system. Such a file could look like this:
 
     - /home/johndoe/.cache/***
     /home

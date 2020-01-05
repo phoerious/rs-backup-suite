@@ -39,7 +39,7 @@ DISABLE_GLOBAL_BACKUP=false
 REMOTE_USER="%h-%u"
 SSH_OPTIONS=""
 RSYNC_OPTIONS=""
-INCLUSION_PATTERN_FILE=".rs-backup/include"
+TRANSFER_PROTOCOL="ssh"
 LOG_LEVEL=3
 PRINT_ERRORS=true
 PRINT_WARNINGS=true
@@ -48,7 +48,8 @@ DESKTOP_NOTIFICATIONS=true
 ###############################################################################
 # Source configs
 ###############################################################################
-. /etc/rs-backup/client-config
+_GLOBAL_CONFIG_PREFIX="/etc/rs-backup"
+. ${_GLOBAL_CONFIG_PREFIX}/client-config
 
 
 ###############################################################################
@@ -56,7 +57,6 @@ DESKTOP_NOTIFICATIONS=true
 ###############################################################################
 
 _VERSION=$(rs-version version)
-_GLOBAL_INCLUSION_PATTERN_FILE="/etc/rs-backup/include-files"
 _FORCED_INCLUSION_PATTERN_FILE=""
 _SKIP_HOME_DIRS=false
 _FALLBACK_LOG_FILE="/var/log/rs-backup.log"
@@ -442,18 +442,20 @@ keep_wsl_ssh_alive() {
 }
 
 # Back up a directory.
-# The third parameter is optional and specifys the user under whose
+# The third parameter is optional and specifies the user under whose
 # privileges the backup will be performed
 # 
-# Usage: perform_backup <inclusion pattern file> <destination> [<username>]
+# Usage: perform_backup <config-prefix> <destination> [<username>]
 # 
 perform_backup() {
-    local inclusion_pattern_file=$1
+    local inclusion_pattern_file=$1/include-files
+    local rsync_pw_file=$1/rsync-password.secret
     local destination=$2
     local username=$3
     local msg
     local backup_cmd
     local ssh_cmd
+    local rsh
     local rsync_opts="${RSYNC_OPTIONS}"
     local exit_code
     local tee_device="/dev/tty"
@@ -475,7 +477,7 @@ perform_backup() {
         username=$(id -un)
     fi
 
-    if [ "${_FORCED_INCLUSION_PATTERN_FILE}" != "" ]; then
+    if [ ! -z "${_FORCED_INCLUSION_PATTERN_FILE}" ]; then
         inclusion_pattern_file=${_FORCED_INCLUSION_PATTERN_FILE}
     fi
 
@@ -484,14 +486,29 @@ perform_backup() {
         return 1
     fi
 
-    if [ "${SSH_OPTIONS}" != "" ]; then
-        ssh_cmd="ssh "$(echo -n "${SSH_OPTIONS}" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g')        # added missing space
+    if [ "${TRANSFER_PROTOCOL}" == "ssh" ]; then
+        if [ "${SSH_OPTIONS}" != "" ]; then
+            ssh_cmd="ssh "$(echo -n "${SSH_OPTIONS}" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g')        # added missing space
+        else
+            ssh_cmd="ssh"
+        fi
+        rsh="--rsh=\"${ssh_cmd}\""
+    elif [ "${TRANSFER_PROTOCOL}" == "rsync" ]; then
+        if [ ! -f "${rsync_pw_file}" ]; then
+            write_log 1 "${rsync_pw_file} does not exist!"
+            return 1
+        elif [ $(stat -c "%a" "$rsync_pw_file") -ne 600 ]; then
+            write_log 1 "Permissions of ${rsync_pw_file} must be 600!"
+            return 1
+        fi
+        rsync_opts="${rsync_opts} --password-file=${rsync_pw_file}"
     else
-        ssh_cmd="ssh"
+        write_log 1 "Invalid transfer protocol ${TRANSFER_PROTOCOL}!"
+        return 1
     fi
 
     backup_cmd="rsync \
-        --rsh=\"${ssh_cmd}\" \
+        "${rsh}" \
         --archive \
         --delete \
         --delete-excluded \
@@ -508,7 +525,7 @@ perform_backup() {
 
     set -o pipefail
 
-    if uname -r | grep -q "Microsoft"; then
+    if [ "${TRANSFER_PROTOCOL}" == "ssh" ] && uname -r | grep -q "Microsoft"; then
         keep_wsl_ssh_alive &
     fi
 
@@ -551,7 +568,7 @@ back_up_system() {
     else
         write_log 3 "Starting global system backup..."
     fi
-    perform_backup "${_GLOBAL_INCLUSION_PATTERN_FILE}" \
+    perform_backup "${_GLOBAL_CONFIG_PREFIX}" \
         "$(replace_placeholders "${REMOTE_USER}" root)@${REMOTE_HOST}::$(replace_placeholders ${PUSH_MODULE} root)"
     return $?
 }
@@ -565,8 +582,8 @@ back_up_single_home_dir() {
     local username=$2
     
     # Don't back up home directory if no files are marked for backup
-    if [ ! -f "${home_dir}/${INCLUSION_PATTERN_FILE}" ]; then
-        write_log 4 "Skipping '${home_dir}', because '${INCLUSION_PATTERN_FILE}' does not exist." 
+    if [ ! -f "${home_dir}/${CONFIG_PREFIX}/include-files" ]; then
+        write_log 4 "Skipping '${home_dir}', because '${CONFIG_PREFIX}/include-files' does not exist." 
         return
     fi
     
@@ -584,7 +601,7 @@ back_up_single_home_dir() {
     else
         write_log 3 "Starting backup of '${home_dir}'..."
     fi
-    perform_backup "${home_dir}/${INCLUSION_PATTERN_FILE}" \
+    perform_backup "${home_dir}/${CONFIG_PREFIX}" \
         "$(replace_placeholders "${REMOTE_USER}" "${username}")@${REMOTE_HOST}::$(replace_placeholders "${PUSH_MODULE}" "${username}")" "${username}"
     return $?
 }
@@ -709,6 +726,12 @@ parse_cmd_args() {
 
 # Register exit trap to catch signals and cleanly shut down the script
 trap handle_exit_signal SIGHUP SIGINT SIGTERM
+
+# Process config variable deprecations
+if [ ! -z "$INCLUSION_PATTERN_FILE" ]; then
+    write_log 1 "INCLUSION_PATTERN_FILE has been replaced with CONFIG_PREFIX, please update your config!"
+    exit 1
+fi
 
 parse_cmd_args "$@"
 

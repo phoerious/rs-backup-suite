@@ -28,8 +28,11 @@ DISABLE_GLOBAL_BACKUP=true
 # backup and the corresponding user for the individual home directories
 REMOTE_USER="%h-%u"
 
+# Rsync transfer protocol: ssh (default) or rsync
+#TRANSFER_PROTOCOL="ssh"
+
 # Additional SSH options
-#SSH_OPTIONS="-C -i .ssh/id_rsa"
+SSH_OPTIONS="-o Compression=no -T -x"
 
 # Additional options for rsync
 #
@@ -43,12 +46,19 @@ REMOTE_USER="%h-%u"
 RSYNC_OPTIONS="--acls --hard-links --xattrs --block-size=131072"
 #RSYNC_OPTIONS="--hard-links --xattrs"
 
-# Name of the file inside the users' home directories
+# Configuration directory prefix relative to a user's home directory.
+#
+# Inside the prefix must be a file called "include-files"
 # containing the patterns for matching files to include or exclude.
 # The format is the same as the global 'include-files' config file
 # and described in the FILTER RULES section of the rsync(1) man page.
 # If no such file is found inside a home directory, it won't be backup up
-INCLUSION_PATTERN_FILE=".rs-backup/include"
+#
+# If TRANSFER_PROTOCOL is set to "rsync" the config prefix must also
+# contain a file called "rsync-password.secret" with permissions 600.
+#
+# For global system backups, the config prefix is always /etc/rs-backup.
+CONFIG_PREFIX=".rs-backup"
 
 # Log verbosity
 # (0 = quiet, 1 = errors only, 2 = errors and warnings, 3 = info, 4 = debug)
